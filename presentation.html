@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local-First AI Agent System for Franchise Discovery</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #111827;
+    --bg-card: #1a2235;
+    --bg-accent: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #3b82f6;
+    --accent-teal: #14b8a6;
+    --accent-purple: #8b5cf6;
+    --accent-red: #ef4444;
+    --accent-amber: #f59e0b;
+    --accent-green: #22c55e;
+    --border: #1e293b;
+    --glow-blue: rgba(59, 130, 246, 0.15);
+    --glow-teal: rgba(20, 184, 166, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  .presentation {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+    overflow-y: auto;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  .slide-content {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -0.03em;
+  }
+
+  h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--accent-teal);
+  }
+
+  .subtitle {
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.5;
+    margin-bottom: 32px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+
+  .tag-blue { background: var(--glow-blue); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.3); }
+  .tag-teal { background: var(--glow-teal); color: var(--accent-teal); border: 1px solid rgba(20,184,166,0.3); }
+  .tag-purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.3); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--accent-red); border: 1px solid rgba(239,68,68,0.3); }
+  .tag-amber { background: rgba(245,158,11,0.15); color: var(--accent-amber); border: 1px solid rgba(245,158,11,0.3); }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Lists */
+  ul, ol {
+    list-style: none;
+    margin: 16px 0;
+  }
+
+  li {
+    position: relative;
+    padding: 10px 0 10px 28px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
+  li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-teal);
+  }
+
+  ol li { counter-increment: item; }
+  ol li::before {
+    content: counter(item);
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 12px;
+  }
+
+  .highlight { color: var(--text-primary); font-weight: 600; }
+
+  /* Cards & Grids */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.3s;
+  }
+
+  .card:hover { border-color: var(--accent-blue); }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .card-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .card-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 8px;
+  }
+
+  .badge-local { background: rgba(20,184,166,0.2); color: var(--accent-teal); }
+  .badge-outbound { background: rgba(59,130,246,0.2); color: var(--accent-blue); }
+  .badge-airgap { background: rgba(239,68,68,0.2); color: var(--accent-red); }
+
+  /* Architecture Diagram */
+  .arch-diagram {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin: 20px 0;
+    position: relative;
+  }
+
+  .arch-zone {
+    border: 2px dashed;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 8px 0;
+  }
+
+  .zone-local {
+    border-color: var(--accent-teal);
+    background: rgba(20,184,166,0.05);
+  }
+
+  .zone-remote {
+    border-color: var(--accent-blue);
+    background: rgba(59,130,246,0.05);
+  }
+
+  .zone-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .privacy-wall {
+    background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+    height: 3px;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  .privacy-wall-label {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    padding: 0 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .arch-node {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 4px;
+  }
+
+  .node-icon { font-size: 1rem; }
+
+  /* Tables */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.85rem;
+  }
+
+  .comp-table th {
+    background: var(--bg-accent);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .comp-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  .comp-table tr:hover td { background: rgba(59,130,246,0.05); }
+
+  .winner-local { color: var(--accent-teal); font-weight: 600; }
+  .winner-franzy { color: var(--accent-amber); font-weight: 600; }
+  .winner-tie { color: var(--text-muted); font-weight: 600; }
+
+  /* Data Flow Arrows */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 0.9rem;
+  }
+
+  .flow-item {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8rem;
+  }
+
+  .flow-public { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .flow-local { background: rgba(20,184,166,0.15); color: var(--accent-teal); }
+  .flow-nowhere { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+  .flow-arrow { color: var(--text-muted); font-size: 1.2rem; }
+
+  /* Narration Panel */
+  .narration-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 80px;
+    z-index: 100;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .narration-toggle:hover {
+    border-color: var(--accent-blue);
+    color: var(--text-primary);
+  }
+
+  .narration-toggle .icon { font-size: 1rem; }
+
+  .narration-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    padding: 20px 80px;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+    z-index: 90;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .narration-panel.open {
+    transform: translateY(0);
+  }
+
+  .narration-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-blue);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .narration-text {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    max-width: 900px;
+    font-style: italic;
+  }
+
+  /* Navigation */
+  .nav-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 20px;
+  }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--text-primary);
+    background: var(--glow-blue);
+  }
+
+  .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .slide-counter {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal));
+    transition: width 0.5s ease;
+    z-index: 100;
+  }
+
+  /* Key insight callouts */
+  .insight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(20,184,166,0.1));
+    border-left: 4px solid var(--accent-blue);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+
+  .insight-box strong { color: var(--accent-teal); }
+
+  .big-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+
+  /* Versus layout */
+  .vs-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 24px;
+    align-items: start;
+    margin: 20px 0;
+  }
+
+  .vs-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 40px;
+    color: var(--text-muted);
+    font-weight: 800;
+    font-size: 1.2rem;
+  }
+
+  .vs-panel {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+  }
+
+  .vs-panel h3 { margin-bottom: 12px; }
+
+  .vs-panel.panel-bad { border-color: rgba(239,68,68,0.3); }
+  .vs-panel.panel-good { border-color: rgba(20,184,166,0.3); }
+
+  .vs-panel.panel-bad h3 { color: var(--accent-red); }
+  .vs-panel.panel-good h3 { color: var(--accent-teal); }
+
+  /* Workflow steps */
+  .workflow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .wf-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+
+  .wf-step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .wf-step-num.outbound { background: rgba(59,130,246,0.2); color: var(--accent-blue); }
+  .wf-step-num.local { background: rgba(20,184,166,0.2); color: var(--accent-teal); }
+  .wf-step-num.user { background: rgba(245,158,11,0.2); color: var(--accent-amber); }
+
+  .wf-agent {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 100px;
+  }
+
+  .wf-desc { color: var(--text-secondary); }
+
+  /* Threat table */
+  .threat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .threat-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .threat-vector {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent-red);
+    margin-bottom: 4px;
+  }
+
+  .threat-fix {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .threat-fix strong { color: var(--accent-teal); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .slide { padding: 40px 32px; }
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.6rem; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .vs-container { grid-template-columns: 1fr; }
+    .vs-divider { display: none; }
+    .threat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="presentation" id="presentation">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide active" data-narration="Welcome. Today we're going to explore a fundamentally different approach to franchise discovery. The thesis is simple but powerful: what if your personal data never had to leave your laptop — and instead, AI agents went out into the world to bring intelligence back to you? We'll deconstruct how Franzy dot com works today, reveal the hidden data asymmetry in franchising, and then design a local-first agent system from first principles. This isn't just about privacy. It's about giving the prospective franchisee a structural advantage they can't get from any centralized platform.">
+    <div class="slide-content" style="text-align:center;">
+      <span class="tag tag-blue">Strategic Design</span>
+      <h1>Local-First AI Agents<br><span class="gradient-text">for Franchise Discovery</span></h1>
+      <p class="subtitle">A First-Principles Alternative to Centralized Matchmaking</p>
+      <div style="display:flex; justify-content:center; gap:40px; margin-top:40px;">
+        <div><div class="big-number">0</div><div class="stat-label">User data transmitted</div></div>
+        <div><div class="big-number">6</div><div class="stat-label">Specialized agents</div></div>
+        <div><div class="big-number">4</div><div class="stat-label">Encrypted vaults</div></div>
+      </div>
+      <p style="color:var(--text-muted); margin-top:48px; font-size:0.85rem;">Your data stays home. Your agents go to work.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: The Five Questions -->
+  <div class="slide" data-narration="Before we talk about technology or platforms, let's get to first principles. Strip away every franchise discovery website, every broker, every matchmaking algorithm. At its core, a person searching for a franchise is trying to answer exactly five irreducible questions. What's out there? What fits me? Is this franchise legitimate? Can I afford it? And how do I move forward? Every franchise platform — Franzy, Franchise Direct, FranNet, even a human broker — is just an answer to some subset of these five questions. Understanding this decomposition is the foundation of everything that follows.">
+    <div class="slide-content">
+      <span class="tag tag-teal">First Principles</span>
+      <h2>What IS Franchise Discovery?</h2>
+      <p class="subtitle">Five irreducible questions every prospective franchisee must answer</p>
+      <ol style="counter-reset: item;">
+        <li><span class="highlight">"What's out there?"</span> — Discovery of the franchise universe</li>
+        <li><span class="highlight">"What fits me?"</span> — Matching personal attributes to franchise characteristics</li>
+        <li><span class="highlight">"Is this real?"</span> — Due diligence (FDD analysis, unit economics, litigation)</li>
+        <li><span class="highlight">"Can I afford it?"</span> — Financial feasibility and financing options</li>
+        <li><span class="highlight">"How do I proceed?"</span> — Connection and transaction execution</li>
+      </ol>
+      <div class="insight-box">
+        Every franchise platform is an answer to a subset of these five questions. The question is: <strong>at what cost to the user?</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: The Data Asymmetry -->
+  <div class="slide" data-narration="Here's the critical insight that Franzy's model obscures. Look at those five questions again. Questions one, three, and five — what's out there, is this real, how do I proceed — require ZERO user data. The franchise universe, FDD documents, and franchisor contact information are all public. An agent can answer these by going out and fetching information without knowing anything about you. Questions two and four — what fits me, can I afford it — DO need your data. But here's the key: that data never needs to leave the room. Matching and affordability are local computations. You bring the franchise data TO the user's machine and compute the match there. The franchise data moves. The user data stays. This is the foundational asymmetry.">
+    <div class="slide-content">
+      <span class="tag tag-purple">Key Insight</span>
+      <h2>The Data Asymmetry</h2>
+      <p class="subtitle">Franchise data is public. User data is private. Respect the asymmetry.</p>
+
+      <div style="display:flex; flex-direction:column; gap:6px; margin:20px 0;">
+        <div class="flow-row"><span class="flow-item flow-public">Franchise listings</span> <span class="flow-arrow">&rarr;</span> <span class="flow-item flow-local">Your laptop</span> <span style="color:var(--text-muted);font-size:0.8rem;">Public data flows IN</span></div>
+        <div class="flow-row"><span class="flow-item flow-public">FDD documents</span> <span class="flow-arrow">&rarr;</span> <span class="flow-item flow-local">Your laptop</span></div>
+        <div class="flow-row"><span class="flow-item flow-public">Unit economics</span> <span class="flow-arrow">&rarr;</span> <span class="flow-item flow-local">Your laptop</span></div>
+        <div class="flow-row"><span class="flow-item flow-public">Contact info</span> <span class="flow-arrow">&rarr;</span> <span class="flow-item flow-local">Your laptop</span></div>
+        <div style="height:8px;"></div>
+        <div class="flow-row"><span class="flow-item flow-nowhere">Your net worth</span> <span class="flow-arrow">&times;</span> <span style="color:var(--accent-red);font-size:0.85rem;font-weight:600;">NOWHERE. Stays on your laptop.</span></div>
+        <div class="flow-row"><span class="flow-item flow-nowhere">Your goals</span> <span class="flow-arrow">&times;</span> <span style="color:var(--accent-red);font-size:0.85rem;font-weight:600;">NOWHERE. Used for local scoring only.</span></div>
+        <div class="flow-row"><span class="flow-item flow-nowhere">Your location</span> <span class="flow-arrow">&times;</span> <span style="color:var(--accent-red);font-size:0.85rem;font-weight:600;">NOWHERE. Used for local territory check.</span></div>
+      </div>
+
+      <div class="insight-box">
+        <strong>3 of 5 questions</strong> require zero user data. The other 2 are <strong>local computations</strong>. There is no technical reason to upload your life to a server.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Franzy Deconstruction -->
+  <div class="slide" data-narration="Now let's deconstruct Franzy dot com. Franzy has five functions, and each one has a visible value to the user — and a hidden cost. The Fit Score collects your goals, finances, and preferences via a five-minute quiz, runs a match on their servers, and returns results. What you get is a ranked list. What Franzy gets is a complete buyer profile — the most valuable lead data in franchising. Their research tools aggregate franchise profiles, but they track everything you search, view, and spend time on — feeding lead scoring. Franzy Connect sends your full profile to a franchisor before you've even vetted them. Financing captures your financial details and shares them with lending partners. Even their education content tracks what you read, when, and how often. In every function, there's a value exchange — and the user consistently gives up more than they realize.">
+    <div class="slide-content">
+      <span class="tag tag-red">Deconstruction</span>
+      <h2>What Franzy Gets vs. What You Get</h2>
+      <p class="subtitle">Five functions, five hidden data extractions</p>
+
+      <div class="vs-container">
+        <div class="vs-panel panel-bad">
+          <h3>What You Give Franzy</h3>
+          <ul>
+            <li>Complete financial profile via 5-min quiz</li>
+            <li>Search behavior (what you view, how long)</li>
+            <li>Full profile transmitted to franchisors before you vet them</li>
+            <li>Financial details shared with lending partners</li>
+            <li>Reading patterns tracked and monetized</li>
+          </ul>
+        </div>
+        <div class="vs-divider">VS</div>
+        <div class="vs-panel panel-good">
+          <h3>What You Get Back</h3>
+          <ul>
+            <li>Ranked franchise matches (775 brands)</li>
+            <li>Structured, comparable profiles</li>
+            <li>Franchisor introductions</li>
+            <li>Rough borrowing capacity estimate</li>
+            <li>Blog posts and guides</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        Franzy's business model is <strong>lead generation</strong>. The user's data IS the product being sold to franchisors. The free tier exists to capture leads, not to serve users.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: The Privacy Wall Architecture -->
+  <div class="slide" data-narration="Now the alternative. The local-first architecture is built around one absolute boundary — the Privacy Wall. Above the wall: your data, local computation, encrypted storage. Nothing crosses down. Below the wall: agents fetching public information from public sources. They don't know who you are. They don't carry your data in their prompts. They fetch franchise data the same way you'd Google it — except systematically and at scale. When a Scout Agent queries 'list all home service franchises,' that query contains zero personal information. The filtering against YOUR actual budget happens locally, on YOUR machine. Over-fetching is a feature — it provides privacy through generality.">
+    <div class="slide-content">
+      <span class="tag tag-teal">Architecture</span>
+      <h2>The Privacy Wall</h2>
+      <p class="subtitle">Inbound-only data flow. Agents go OUT. Your data stays IN.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone zone-local">
+          <div class="zone-label" style="color:var(--accent-teal);">
+            <span>&#x1f512;</span> YOUR LAPTOP — Encrypted, local, air-gapped
+          </div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <div class="arch-node"><span class="node-icon">&#x1f464;</span> User Profile (encrypted)</div>
+            <div class="arch-node"><span class="node-icon">&#x1f9e0;</span> Local LLM (Ollama)</div>
+            <div class="arch-node"><span class="node-icon">&#x1f4be;</span> Franchise DB (SQLite)</div>
+            <div class="arch-node"><span class="node-icon">&#x2699;&#xfe0f;</span> Agent Orchestrator</div>
+            <div class="arch-node"><span class="node-icon">&#x1f3af;</span> Matcher Agent</div>
+            <div class="arch-node"><span class="node-icon">&#x1f4b0;</span> Finance Agent</div>
+          </div>
+        </div>
+
+        <div class="privacy-wall">
+          <span class="privacy-wall-label">&#x1f6d1; PRIVACY WALL — Nothing about YOU crosses this line</span>
+        </div>
+
+        <div class="arch-zone zone-remote">
+          <div class="zone-label" style="color:var(--accent-blue);">
+            <span>&#x1f310;</span> PUBLIC INTERNET — Agents fetch public data (no PII in queries)
+          </div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <div class="arch-node"><span class="node-icon">&#x1f50d;</span> Scout Agent</div>
+            <div class="arch-node"><span class="node-icon">&#x1f4ca;</span> Analyst Agent</div>
+            <div class="arch-node"><span class="node-icon">&#x1f517;</span> Connector Agent</div>
+            <div class="arch-node"><span class="node-icon">&#x1f393;</span> Educator Agent</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:24px; font-size:0.8rem; color:var(--text-muted); justify-content:center;">
+        <span><span style="color:var(--accent-teal);">&#x25cf;</span> Air-gapped (no network)</span>
+        <span><span style="color:var(--accent-blue);">&#x25cf;</span> Outbound (zero PII)</span>
+        <span><span style="color:var(--accent-red);">&#x25cf;</span> Privacy Wall</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: The Six Agents -->
+  <div class="slide" data-narration="The system uses six specialized agents, each with strict data access boundaries. The Scout Agent discovers franchise opportunities from public sources — it has zero knowledge of the user and could run on a public computer with identical results. The Analyst Agent does deep due diligence — FDD analysis, litigation history, financials — but only receives brand names, never user data. The Matcher Agent is the core matching engine, and it's the most sensitive — it has full access to your profile AND franchise data, but it's completely air-gapped. No network socket. Even if compromised, it can't send your data anywhere. The Finance Agent models affordability scenarios, also air-gapped. The Connector Agent fetches application info but doesn't know your name. And the Educator Agent provides guidance using locally-cached content. The key principle: least privilege. No agent has more data access than its job requires.">
+    <div class="slide-content">
+      <span class="tag tag-blue">Agent System</span>
+      <h2>Six Specialized Agents</h2>
+      <p class="subtitle">Each with strict role, tools, and data access boundaries</p>
+
+      <div class="card-grid grid-3">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(59,130,246,0.15);">&#x1f50d;</div>
+          <div class="card-title">Scout Agent</div>
+          <div class="card-desc">Discovers and catalogs franchise opportunities from all public sources. Zero user knowledge.</div>
+          <div class="card-badge badge-outbound">Outbound &middot; No PII</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(139,92,246,0.15);">&#x1f4ca;</div>
+          <div class="card-title">Analyst Agent</div>
+          <div class="card-desc">Deep due diligence: FDDs, litigation, unit economics, competitive analysis. Receives brand names only.</div>
+          <div class="card-badge badge-outbound">Outbound &middot; No PII</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(20,184,166,0.15);">&#x1f3af;</div>
+          <div class="card-title">Matcher Agent</div>
+          <div class="card-desc">Scores franchise-user fit using local LLM. Full profile access. Air-gapped — no network socket.</div>
+          <div class="card-badge badge-airgap">Local Only &middot; Air-Gapped</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(245,158,11,0.15);">&#x1f4b0;</div>
+          <div class="card-title">Finance Agent</div>
+          <div class="card-desc">Loan modeling, ROI, cash flow scenarios. Uses user financials. Never contacts lenders.</div>
+          <div class="card-badge badge-airgap">Local Only &middot; Air-Gapped</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(59,130,246,0.15);">&#x1f517;</div>
+          <div class="card-title">Connector Agent</div>
+          <div class="card-desc">Retrieves application requirements and contact info. Doesn't know the user's name.</div>
+          <div class="card-badge badge-outbound">Outbound &middot; No PII</div>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(34,197,94,0.15);">&#x1f393;</div>
+          <div class="card-title">Educator Agent</div>
+          <div class="card-desc">Franchise education, decision frameworks, Q&A. Locally-cached content. No financials access.</div>
+          <div class="card-badge badge-local">Local &middot; Goals Only</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Orchestration Workflow -->
+  <div class="slide" data-narration="Here's how these agents work together in practice. When a user says 'find me the perfect franchise,' the workflow progresses through nine steps. First, the Educator helps articulate goals — stored locally, no network. Then the Scout fetches all franchises from public sources — the query is just 'get franchises,' not 'get franchises for Nick.' The Matcher scores everything locally and produces a ranked list. The user reviews and picks five to ten for a deep dive. The Analyst pulls FDD documents and litigation history — again, just asking 'tell me about Brand X,' not 'is Brand X good for someone with 150K.' Finance models affordability locally. The user narrows to finalists. Connector gets application info. And finally — critically — the USER sends inquiries manually. They choose what to share, with whom, and when. The system prepares. The human decides.">
+    <div class="slide-content">
+      <span class="tag tag-teal">Workflow</span>
+      <h2>Agent Orchestration</h2>
+      <p class="subtitle">"Find me the perfect franchise" — end to end</p>
+
+      <div class="workflow-steps">
+        <div class="wf-step">
+          <div class="wf-step-num local">1</div>
+          <div class="wf-agent">Educator</div>
+          <div class="wf-desc">Helps articulate goals, risk tolerance, budget &rarr; stored locally</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num outbound">2</div>
+          <div class="wf-agent">Scout</div>
+          <div class="wf-desc">Fetches all franchises from public sources &rarr; local database (775+ brands)</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num local">3</div>
+          <div class="wf-agent">Matcher</div>
+          <div class="wf-desc">Scores every franchise against user criteria &rarr; ranked list (air-gapped)</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num user">4</div>
+          <div class="wf-agent">User</div>
+          <div class="wf-desc">Reviews top matches, selects 5-10 for deep dive</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num outbound">5</div>
+          <div class="wf-agent">Analyst</div>
+          <div class="wf-desc">Fetches FDDs, litigation, financials for selected brands &rarr; due diligence reports</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num local">6</div>
+          <div class="wf-agent">Finance</div>
+          <div class="wf-desc">Models affordability for shortlist &rarr; SBA, ROBS, equity scenarios (air-gapped)</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num user">7</div>
+          <div class="wf-agent">User</div>
+          <div class="wf-desc">Narrows to 2-3 finalists</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num outbound">8</div>
+          <div class="wf-agent">Connector</div>
+          <div class="wf-desc">Fetches application requirements &rarr; draft inquiry letters</div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-step-num user">9</div>
+          <div class="wf-agent" style="color:var(--accent-amber);">USER</div>
+          <div class="wf-desc" style="color:var(--text-primary);font-weight:600;">Sends inquiries manually. Full control over what is shared, with whom, and when.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Threat Model -->
+  <div class="slide" data-narration="No privacy architecture is complete without a threat model. We identified eight attack vectors and designed mitigations for each. Agent prompts could leak data — but outbound agents never receive user profile data, and the orchestrator enforces PII stripping. Cloud LLM telemetry could log prompts — but local agents use local models, and outbound agents send only public-data queries. Inference attacks could reveal preferences through narrow queries — but the broad-fetch strategy prevents this by over-fetching. Data stores are encrypted with OS keychains. The financing tension is handled honestly: the system never automates disclosure. The user generates a financing packet and shares it manually when THEY are ready. Even network metadata is addressed — fetching all 775 profiles doesn't reveal which one you care about. And data is compartmentalized across four encrypted vaults with distinct access policies per agent.">
+    <div class="slide-content">
+      <span class="tag tag-red">Security</span>
+      <h2>Privacy Threat Model</h2>
+      <p class="subtitle">Eight vectors identified, eight mitigated. Four encrypted vaults.</p>
+
+      <div class="threat-grid">
+        <div class="threat-item">
+          <div class="threat-vector">Agent Prompts</div>
+          <div class="threat-fix">Outbound agents <strong>never receive user profile data</strong>. Orchestrator enforces PII stripping.</div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-vector">LLM Telemetry</div>
+          <div class="threat-fix">Local agents use <strong>local models only</strong>. Outbound agents send only public-data queries.</div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-vector">Inference Attacks</div>
+          <div class="threat-fix"><strong>Broad-fetch strategy</strong>: Scout gets ALL franchises. Local filter narrows. Over-fetching = privacy.</div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-vector">Data Store Compromise</div>
+          <div class="threat-fix"><strong>4 encrypted vaults</strong> with distinct access policies. No single agent accesses all four.</div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-vector">User Profile Theft</div>
+          <div class="threat-fix"><strong>AES-256 encryption</strong> at rest. Decryption requires biometric/password auth.</div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-vector">Financing Disclosure</div>
+          <div class="threat-fix">System models locally. User generates <strong>financing packet manually</strong>. Agent never transmits.</div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-vector">Franchisor Contact</div>
+          <div class="threat-fix">System <strong>prepares materials</strong>. User sends manually. User <strong>chooses when</strong> to disclose identity.</div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-vector">Network Metadata</div>
+          <div class="threat-fix">Optional <strong>VPN/Tor routing</strong>. Broad fetching obscures which franchise you care about.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: What Local-First Makes Possible -->
+  <div class="slide" data-narration="Here's where it gets really interesting. Local-first isn't just about privacy — it enables capabilities that are structurally impossible in Franzy's centralized model. First: honest scoring. Franzy's match scores may be influenced by which franchisors pay more for leads. A local Matcher scores purely on fit with zero monetization pressure. You can inspect the algorithm yourself. Second: adversarial due diligence. A local Analyst can pull negative information — litigation, complaints, FDD red flags — without any platform filtering it to protect brand partners. Franzy's revenue comes from franchisors, not franchisees. That's a structural conflict a local system doesn't have. Third: cross-platform intelligence. You're not limited to 775 franchises. Scout agents scrape everything. Fourth — and this is the big one — reversed information asymmetry. In Franzy's model, the franchisor knows everything about you before first contact. In the local model, YOU know everything about THEM, and they know nothing about you until you choose to share. That's a profound power shift.">
+    <div class="slide-content">
+      <span class="tag tag-purple">Strategic Advantage</span>
+      <h2>What Local-First Makes Possible</h2>
+      <p class="subtitle">Four capabilities impossible in any centralized model</p>
+
+      <div class="card-grid grid-2">
+        <div class="card" style="border-left:3px solid var(--accent-teal);">
+          <div class="card-title">1. Honest Scoring</div>
+          <div class="card-desc" style="font-size:0.9rem;">No sponsor bias. No monetization pressure to rank paying brands higher. You can inspect the algorithm. It's your software on your machine.</div>
+        </div>
+        <div class="card" style="border-left:3px solid var(--accent-purple);">
+          <div class="card-title">2. Adversarial Due Diligence</div>
+          <div class="card-desc" style="font-size:0.9rem;">Pull litigation, complaints, FDD red flags without platform filtering. No structural conflict — the system serves only you.</div>
+        </div>
+        <div class="card" style="border-left:3px solid var(--accent-blue);">
+          <div class="card-title">3. Cross-Platform Intelligence</div>
+          <div class="card-desc" style="font-size:0.9rem;">Not limited to one platform's 775 brands. Scout agents scrape Franchise Direct, FranNet, Franchise Gator, IFA, state registrations, and more.</div>
+        </div>
+        <div class="card" style="border-left:3px solid var(--accent-amber);">
+          <div class="card-title">4. Reversed Information Asymmetry</div>
+          <div class="card-desc" style="font-size:0.9rem;">You have deep due diligence on the franchisor. They know nothing about you until you choose to share. This is a profound power shift.</div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        In Franzy's model, the franchisor receives your full profile <strong>before first contact</strong>. In the local model, you negotiate from a position of strength — not disclosure.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: Comparison Matrix -->
+  <div class="slide" data-narration="Let's be honest about the tradeoffs. This comparison matrix shows where each model wins across twelve dimensions. Local-first wins on discovery breadth — unlimited versus 775. Match quality — transparent versus potentially biased. Due diligence depth — FDD-level versus surface profiles. Privacy — obviously. Negotiating position — you know everything, they know nothing. Education — aggregated from all sources. And critically, conflict of interest — none versus structural. Franzy wins on speed of matching — server-side is faster than local inference. And ease of use — a five-minute web quiz versus running agent software on your laptop. Cost is nuanced: Franzy is free in dollars but expensive in data. The honest takeaway? For a 200-dollar purchase, Franzy's convenience wins. For a life-changing 50K to 500K investment? The depth and privacy win overwhelmingly.">
+    <div class="slide-content">
+      <span class="tag tag-amber">Comparison</span>
+      <h2>Honest Tradeoff Matrix</h2>
+      <p class="subtitle">Where each model wins — and where it doesn't</p>
+
+      <table class="comp-table">
+        <thead>
+          <tr><th>Dimension</th><th>Franzy (Centralized)</th><th>Local-First Agents</th><th>Winner</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Discovery breadth</td><td>775 franchises</td><td>Unlimited (all public sources)</td><td class="winner-local">Local-First</td></tr>
+          <tr><td>Match quality</td><td>Proprietary, potential bias</td><td>Transparent, zero conflicts</td><td class="winner-local">Local-First</td></tr>
+          <tr><td>Speed</td><td>Fast (server-side)</td><td>Moderate (local inference)</td><td class="winner-franzy">Franzy</td></tr>
+          <tr><td>Due diligence</td><td>Surface profiles</td><td>Deep FDD + litigation</td><td class="winner-local">Local-First</td></tr>
+          <tr><td>Privacy</td><td>Full profile captured</td><td>Zero data leaves laptop</td><td class="winner-local">Local-First</td></tr>
+          <tr><td>Financing</td><td>Integrated but capturing</td><td>Local modeling + manual disclosure</td><td class="winner-tie">Tie</td></tr>
+          <tr><td>Ease of use</td><td>5-minute web quiz</td><td>Agent setup required</td><td class="winner-franzy">Franzy</td></tr>
+          <tr><td>Negotiating position</td><td>Franchisor knows all</td><td>You know all; they know nothing</td><td class="winner-local">Local-First</td></tr>
+          <tr><td>Conflict of interest</td><td>Revenue from franchisors</td><td>None — serves only user</td><td class="winner-local">Local-First</td></tr>
+        </tbody>
+      </table>
+
+      <div class="insight-box">
+        For a $200 purchase, convenience wins. For a <strong>$50K-$500K life-changing investment</strong>, depth and privacy win overwhelmingly.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: The Financing Tension -->
+  <div class="slide" data-narration="We need to be honest about the one area where local-first can't be absolute: financing. You cannot borrow money anonymously. Getting a loan requires disclosing financial information to a lender. That's irreducible. But the local-first approach still gives you structural advantages. First: local pre-screening. The Finance Agent models your borrowing capacity using publicly-known lending criteria — SBA 7(a) requirements, ROBS eligibility rules — so you know whether you'll likely qualify BEFORE sharing data with anyone. Second: user-controlled selective disclosure. When you're ready, you generate a financing packet containing exactly what you choose to share, sent to the lender you choose, by your own hand. Third — and this is crucial — separation of discovery from financing. In Franzy's model, your financial data is captured during discovery, in the five-minute quiz, before you've even decided which franchise to pursue. In the local model, disclosure only happens at the financing stage, after private analysis. The blast radius is minimized.">
+    <div class="slide-content">
+      <span class="tag tag-amber">Honest Treatment</span>
+      <h2>The Financing Tension</h2>
+      <p class="subtitle">The one area where privacy has irreducible limits — and how we minimize exposure</p>
+
+      <div class="card-grid" style="grid-template-columns:1fr;">
+        <div class="card" style="border-left:3px solid var(--accent-amber);">
+          <h3 style="color:var(--accent-amber);">The Reality</h3>
+          <p style="color:var(--text-secondary);font-size:0.95rem;">You cannot borrow money anonymously. Getting a loan requires disclosing financial information to a lender. This is irreducible.</p>
+        </div>
+      </div>
+
+      <div class="card-grid grid-3" style="margin-top:8px;">
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-teal);">1. Local Pre-Screening</div>
+          <div class="card-desc">Finance Agent models borrowing capacity using publicly-known lending criteria. Know if you qualify BEFORE sharing data.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-teal);">2. Selective Disclosure</div>
+          <div class="card-desc">YOU generate a financing packet. YOU choose what to include. YOU select the lender. YOU send it yourself.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-teal);">3. Separate Discovery from Financing</div>
+          <div class="card-desc">In Franzy, financial data is captured during the quiz — before you've chosen a franchise. Here, disclosure only happens at the financing stage.</div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        Franzy captures your financial data at <strong>discovery</strong>. The local model defers disclosure to <strong>financing</strong>. The blast radius is minimized.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: Implementation Stack -->
+  <div class="slide" data-narration="This isn't theoretical. The entire system is buildable today with existing tools. Claude Code serves as the agent orchestrator — it already handles agent spawning, tool use, and coordination. Ollama runs local LLM inference for the Matcher and Finance agents, completely air-gapped. SQLite with AES-256 encryption handles local storage across four compartmentalized vaults. Standard web scraping tools like Playwright handle public data collection. And the OS keychain manages encryption keys. No new infrastructure required. No custom servers. No cloud dependencies for the core privacy-sensitive operations. Just a laptop, some open-source software, and agents that work for you.">
+    <div class="slide-content">
+      <span class="tag tag-blue">Implementation</span>
+      <h2>Buildable Today</h2>
+      <p class="subtitle">No new infrastructure. No cloud dependency. Just your laptop.</p>
+
+      <div class="card-grid grid-2">
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-blue);">&#x2699;&#xfe0f; Agent Orchestrator</div>
+          <div class="card-desc"><strong>Claude Code</strong> — agent spawning, tool use, coordination. Already built.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-teal);">&#x1f9e0; Local LLM</div>
+          <div class="card-desc"><strong>Ollama / llama.cpp</strong> — Matcher and Finance agents. Air-gapped inference.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-purple);">&#x1f4be; Local Database</div>
+          <div class="card-desc"><strong>SQLite + AES-256</strong> — Four encrypted vaults. Lightweight, no server.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-amber);">&#x1f310; Web Scraping</div>
+          <div class="card-desc"><strong>Playwright / Puppeteer</strong> — Public data collection for Scout and Analyst agents.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--accent-green);">&#x1f511; Key Management</div>
+          <div class="card-desc"><strong>macOS Keychain / DPAPI</strong> — OS-level encryption key storage. Biometric unlock.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--text-secondary);">&#x1f5a5;&#xfe0f; Local UI</div>
+          <div class="card-desc"><strong>localhost web server</strong> — Dashboard for matches, analysis, and workflow progress.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: Conclusion -->
+  <div class="slide" data-narration="Here's the conclusion, and it's simple. Franzy says: give us your data, and we'll find you a franchise. The local-first model says: keep your data, and your agents will find you a franchise. The second argument is stronger because franchise discovery has a unique property that makes it perfectly suited to this approach: almost all the useful information is already public. FDDs are public. Franchise listings are public. Investment ranges are public. Contact info is public. The only private data is yours — and it never needs to leave your machine for the matching to work. This isn't a privacy-for-convenience tradeoff. It's a privacy AND capability improvement — because a local system can be more honest, more thorough, and more empowering than any centralized alternative. The future of AI for high-stakes personal decisions isn't 'upload your life to the cloud and hope for the best.' It's 'your data stays home, your agents go to work, and you make the decision from a position of strength.'">
+    <div class="slide-content" style="text-align:center;">
+      <span class="tag tag-teal">Conclusion</span>
+      <h1>The Asymmetry That<br><span class="gradient-text">Changes Everything</span></h1>
+
+      <div style="max-width:700px; margin:32px auto; text-align:left;">
+        <div style="display:flex; gap:24px; margin-bottom:24px;">
+          <div style="flex:1; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:20px;">
+            <div style="color:var(--accent-red);font-weight:700;font-size:0.8rem;text-transform:uppercase;margin-bottom:8px;">Franzy's Argument</div>
+            <p style="color:var(--text-secondary);font-size:0.95rem;">"Give us your data, and we'll find you a franchise."</p>
+          </div>
+          <div style="flex:1; background:rgba(20,184,166,0.1); border:1px solid rgba(20,184,166,0.2); border-radius:12px; padding:20px;">
+            <div style="color:var(--accent-teal);font-weight:700;font-size:0.8rem;text-transform:uppercase;margin-bottom:8px;">The Local-First Argument</div>
+            <p style="color:var(--text-secondary);font-size:0.95rem;">"Keep your data, and your agents will find you a franchise."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-box" style="max-width:700px; margin:0 auto; text-align:left;">
+        This isn't a privacy-for-convenience tradeoff. It's a <strong>privacy AND capability improvement</strong> — because a local system is more honest, more thorough, and more empowering than any centralized alternative.
+      </div>
+
+      <p style="color:var(--text-muted); margin-top:40px; font-size:1.1rem; font-weight:300;">
+        Your data stays home. Your agents go to work.<br>
+        You make the decision from a position of <span style="color:var(--accent-teal);font-weight:600;">strength</span>.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Narration Panel -->
+<div class="narration-panel" id="narrationPanel">
+  <div class="narration-label"><span>&#x1f399;&#xfe0f;</span> Narration</div>
+  <div class="narration-text" id="narrationText"></div>
+</div>
+
+<!-- Navigation -->
+<button class="narration-toggle" id="narrationToggle" onclick="toggleNarration()">
+  <span class="icon">&#x1f399;&#xfe0f;</span> Narration
+</button>
+
+<div class="nav-bar">
+  <button class="nav-btn" id="prevBtn" onclick="prevSlide()" aria-label="Previous slide">&#x2190;</button>
+  <span class="slide-counter" id="slideCounter">1 / 13</span>
+  <button class="nav-btn" id="nextBtn" onclick="nextSlide()" aria-label="Next slide">&#x2192;</button>
+</div>
+
+<script>
+  let current = 0;
+  let narrationOpen = false;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+
+  function showSlide(index) {
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'prev');
+      if (i === index) s.classList.add('active');
+      else if (i < index) s.classList.add('prev');
+    });
+    document.getElementById('slideCounter').textContent = `${index + 1} / ${total}`;
+    document.getElementById('prevBtn').disabled = index === 0;
+    document.getElementById('nextBtn').disabled = index === total - 1;
+    document.getElementById('progressBar').style.width = `${((index + 1) / total) * 100}%`;
+
+    // Update narration
+    const narration = slides[index].getAttribute('data-narration');
+    document.getElementById('narrationText').textContent = narration || '';
+  }
+
+  function nextSlide() { if (current < total - 1) { current++; showSlide(current); } }
+  function prevSlide() { if (current > 0) { current--; showSlide(current); } }
+
+  function toggleNarration() {
+    narrationOpen = !narrationOpen;
+    document.getElementById('narrationPanel').classList.toggle('open', narrationOpen);
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    if (e.key === 'n' || e.key === 'N') { toggleNarration(); }
+  });
+
+  // Touch navigation
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+  });
+
+  // Initialize
+  showSlide(0);
+</script>
+
+</body>
+</html>

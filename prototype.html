@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Franchise Discovery — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0b1120;
+  --bg2: #111827;
+  --card: #1a2332;
+  --card-hover: #1f2b3d;
+  --border: rgba(148,163,184,0.1);
+  --border-h: rgba(148,163,184,0.2);
+  --t1: #f1f5f9;
+  --t2: #94a3b8;
+  --t3: #64748b;
+  --teal: #14b8a6;
+  --blue: #3b82f6;
+  --purple: #a855f7;
+  --amber: #f59e0b;
+  --green: #22c55e;
+  --red: #ef4444;
+}
+
+html, body { height:100%; overflow:hidden; }
+body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);
+  color:var(--t1);
+  line-height:1.5;
+}
+
+/* ─── App Shell ─────────────────────────────── */
+.app {
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  max-width:480px;
+  margin:0 auto;
+  position:relative;
+  background:var(--bg);
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+}
+
+/* ─── Top Bar ───────────────────────────────── */
+.top-bar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  background:rgba(11,17,32,0.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  z-index:10;
+  flex-shrink:0;
+}
+
+.top-brand {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  font-size:0.95rem;
+}
+
+.top-logo {
+  width:28px;height:28px;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;
+}
+
+.privacy-pill {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  background:rgba(20,184,166,0.1);
+  border:1px solid rgba(20,184,166,0.25);
+  color:var(--teal);
+  padding:4px 10px;
+  border-radius:100px;
+  font-size:0.65rem;
+  font-weight:600;
+}
+
+.privacy-dot {
+  width:6px;height:6px;
+  background:var(--teal);
+  border-radius:50%;
+  animation:blink 2s infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ─── Progress Bar ──────────────────────────── */
+.progress-wrap {
+  padding:0 16px;
+  padding-top:8px;
+  background:var(--bg);
+  flex-shrink:0;
+}
+
+.progress-steps {
+  display:flex;
+  gap:3px;
+}
+
+.progress-step {
+  flex:1;
+  height:3px;
+  background:var(--border);
+  border-radius:2px;
+  transition:background .4s;
+}
+
+.progress-step.done { background:var(--teal); }
+.progress-step.active { background:var(--blue); }
+
+.progress-label {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:6px;
+  padding-bottom:8px;
+}
+
+.progress-label span {
+  font-size:0.65rem;
+  color:var(--t3);
+}
+
+/* ─── Agent Badge ───────────────────────────── */
+.agent-active {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:3px 8px;
+  border-radius:6px;
+  font-size:0.6rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.agent-active.outbound { background:rgba(59,130,246,.12); color:var(--blue); }
+.agent-active.airgap { background:rgba(168,85,247,.12); color:var(--purple); }
+.agent-active.local { background:rgba(34,197,94,.12); color:var(--green); }
+.agent-active.user { background:rgba(245,158,11,.12); color:var(--amber); }
+
+/* ─── Screen Container ──────────────────────── */
+.screen-area {
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+
+.screen {
+  display:none;
+  padding:20px 16px 100px;
+  animation:fadeIn .3s ease;
+}
+
+.screen.active { display:block; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* ─── Bottom Actions ────────────────────────── */
+.bottom-bar {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:12px 16px;
+  background:linear-gradient(transparent, var(--bg) 30%);
+  padding-top:32px;
+  z-index:5;
+}
+
+.btn-primary {
+  width:100%;
+  padding:14px;
+  background:var(--teal);
+  color:var(--bg);
+  border:none;
+  border-radius:12px;
+  font-size:1rem;
+  font-weight:700;
+  font-family:inherit;
+  cursor:pointer;
+  transition:all .2s;
+}
+
+.btn-primary:hover { background:#0d9488; }
+
+.btn-secondary {
+  width:100%;
+  padding:12px;
+  background:transparent;
+  color:var(--t2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:0.9rem;
+  font-weight:500;
+  font-family:inherit;
+  cursor:pointer;
+  margin-top:8px;
+}
+
+.btn-secondary:hover { border-color:var(--border-h); color:var(--t1); }
+
+/* ─── Common Elements ───────────────────────── */
+h1 { font-size:1.6rem; font-weight:800; line-height:1.2; letter-spacing:-.02em; }
+h2 { font-size:1.2rem; font-weight:700; margin-bottom:12px; }
+h3 { font-size:1rem; font-weight:600; }
+
+.subtitle { color:var(--t2); font-size:0.9rem; margin-top:6px; line-height:1.5; }
+.gradient { background:linear-gradient(135deg,var(--teal),var(--blue),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:10px;
+  transition:all .2s;
+  cursor:pointer;
+}
+
+.card:hover { background:var(--card-hover); border-color:var(--border-h); }
+.card.selected { border-color:var(--teal); background:rgba(20,184,166,.05); }
+
+.card-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.card-icon {
+  width:44px;height:44px;
+  border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;
+  flex-shrink:0;
+}
+
+.card-body { flex:1; min-width:0; }
+.card-title { font-weight:600; font-size:0.95rem; }
+.card-sub { color:var(--t2); font-size:0.8rem; margin-top:2px; }
+
+.badge {
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:5px;
+  font-size:0.6rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+
+.badge-teal { background:rgba(20,184,166,.12); color:var(--teal); }
+.badge-blue { background:rgba(59,130,246,.12); color:var(--blue); }
+.badge-purple { background:rgba(168,85,247,.12); color:var(--purple); }
+.badge-amber { background:rgba(245,158,11,.12); color:var(--amber); }
+.badge-green { background:rgba(34,197,94,.12); color:var(--green); }
+.badge-red { background:rgba(239,68,68,.12); color:var(--red); }
+
+.score-ring {
+  width:52px;height:52px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.95rem;
+  flex-shrink:0;
+}
+
+.tag { font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); margin-bottom:8px; }
+
+.divider { height:1px; background:var(--border); margin:16px 0; }
+
+.info-row {
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+  font-size:0.85rem;
+}
+
+.info-row .label { color:var(--t3); }
+.info-row .value { font-weight:600; }
+
+.input-group { margin-bottom:14px; }
+.input-group label { display:block; font-size:0.8rem; font-weight:600; color:var(--t2); margin-bottom:6px; }
+.input-group input, .input-group select {
+  width:100%;
+  padding:12px 14px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--t1);
+  font-size:0.95rem;
+  font-family:inherit;
+  outline:none;
+}
+.input-group input:focus, .input-group select:focus { border-color:var(--teal); }
+.input-group select option { background:var(--bg2); }
+
+.chip-group { display:flex; flex-wrap:wrap; gap:8px; }
+.chip {
+  padding:8px 14px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:100px;
+  font-size:0.8rem;
+  cursor:pointer;
+  transition:all .2s;
+  color:var(--t2);
+}
+.chip:hover { border-color:var(--border-h); color:var(--t1); }
+.chip.active { border-color:var(--teal); background:rgba(20,184,166,.08); color:var(--teal); }
+
+.stat-row {
+  display:flex;
+  gap:10px;
+  margin:16px 0;
+}
+
+.stat-box {
+  flex:1;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 12px;
+  text-align:center;
+}
+
+.stat-box .num { font-size:1.4rem; font-weight:800; color:var(--teal); }
+.stat-box .lbl { font-size:0.65rem; color:var(--t3); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+
+.alert-box {
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:0.8rem;
+  line-height:1.5;
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+}
+
+.alert-box.info { background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.15); color:var(--blue); }
+.alert-box.warn { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.15); color:var(--amber); }
+.alert-box.success { background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.15); color:var(--green); }
+.alert-box.danger { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.15); color:var(--red); }
+
+.check-item {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+  font-size:0.85rem;
+  color:var(--t2);
+}
+
+.check-item .ck {
+  width:20px;height:20px;
+  border-radius:6px;
+  border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  font-size:0.7rem;
+  cursor:pointer;
+  transition:all .2s;
+}
+
+.check-item .ck.checked { background:var(--teal); border-color:var(--teal); color:var(--bg); }
+
+/* ─── Loading animation ─────────────────────── */
+.loading-bar {
+  height:4px;
+  background:var(--card);
+  border-radius:2px;
+  overflow:hidden;
+  margin:16px 0;
+}
+
+.loading-bar .fill {
+  height:100%;
+  background:linear-gradient(90deg,var(--teal),var(--blue));
+  border-radius:2px;
+  animation:load 2s ease-in-out forwards;
+}
+
+@keyframes load { from{width:0} to{width:100%} }
+
+/* ─── Comparison Table ──────────────────────── */
+.comp-row {
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.comp-col {
+  flex:1;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  text-align:center;
+}
+
+.comp-col h4 { font-size:0.75rem; margin-bottom:6px; }
+.comp-col .big { font-size:1.3rem; font-weight:800; }
+.comp-col .sm { font-size:0.7rem; color:var(--t3); margin-top:2px; }
+
+/* ─── Red flag markers ──────────────────────── */
+.flag-item {
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:10px;
+  background:rgba(239,68,68,.05);
+  border:1px solid rgba(239,68,68,.12);
+  border-radius:10px;
+  margin-bottom:8px;
+  font-size:0.8rem;
+  color:var(--t2);
+}
+
+.flag-item .icon { color:var(--red); font-size:0.9rem; flex-shrink:0; margin-top:1px; }
+.flag-ok { background:rgba(34,197,94,.05); border-color:rgba(34,197,94,.12); }
+.flag-ok .icon { color:var(--green); }
+
+.screen-title-area { margin-bottom:20px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-brand">
+      <div class="top-logo">&#x1f916;</div>
+      <span>FranchiseAI</span>
+    </div>
+    <div class="privacy-pill">
+      <span class="privacy-dot"></span>
+      <span id="privacyLabel">All Data Local</span>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-steps" id="progressSteps"></div>
+    <div class="progress-label">
+      <span id="stepLabel">Step 1 of 10</span>
+      <span class="agent-active local" id="agentBadge">&#x1f393; Educator &middot; Local</span>
+    </div>
+  </div>
+
+  <!-- Screens -->
+  <div class="screen-area">
+
+    <!-- SCREEN 0: Welcome -->
+    <div class="screen active" id="s0">
+      <div style="text-align:center;padding-top:32px;">
+        <div style="font-size:3rem;margin-bottom:16px;">&#x1f916;</div>
+        <h1>Your Franchise<br><span class="gradient">Discovery Begins</span></h1>
+        <p class="subtitle" style="margin:16px auto;max-width:320px;">Six AI agents will research franchises for you. Your personal data never leaves this device.</p>
+
+        <div class="stat-row">
+          <div class="stat-box"><div class="num">0</div><div class="lbl">Data Sent</div></div>
+          <div class="stat-box"><div class="num">6</div><div class="lbl">AI Agents</div></div>
+          <div class="stat-box"><div class="num">4</div><div class="lbl">Vaults</div></div>
+        </div>
+
+        <div class="alert-box info" style="text-align:left;margin-top:16px;">
+          <span>&#x1f512;</span>
+          <span>Everything you enter stays encrypted on your device. No accounts, no cloud storage, no data harvesting.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: Educator / Onboarding -->
+    <div class="screen" id="s1">
+      <div class="screen-title-area">
+        <div class="tag">Step 1 &mdash; Define Your Goals</div>
+        <h2>Let's understand what you're looking for</h2>
+        <p class="subtitle">The Educator Agent helps you articulate your franchise goals. All answers stay on your device.</p>
+      </div>
+
+      <div class="input-group">
+        <label>What's your investment budget?</label>
+        <select id="inBudget" onchange="updateProfile()">
+          <option value="">Select range...</option>
+          <option value="50-100">$50K &ndash; $100K</option>
+          <option value="100-200">$100K &ndash; $200K</option>
+          <option value="200-350">$200K &ndash; $350K</option>
+          <option value="350-500">$350K &ndash; $500K</option>
+          <option value="500+">$500K+</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>What matters most to you?</label>
+        <div class="chip-group" id="goalChips">
+          <div class="chip" onclick="toggleChip(this)">Semi-Absentee</div>
+          <div class="chip" onclick="toggleChip(this)">Owner-Operator</div>
+          <div class="chip" onclick="toggleChip(this)">Multi-Unit</div>
+          <div class="chip" onclick="toggleChip(this)">Home-Based</div>
+          <div class="chip" onclick="toggleChip(this)">B2B Services</div>
+          <div class="chip" onclick="toggleChip(this)">Food & Beverage</div>
+          <div class="chip" onclick="toggleChip(this)">Health & Fitness</div>
+          <div class="chip" onclick="toggleChip(this)">Education</div>
+          <div class="chip" onclick="toggleChip(this)">Home Services</div>
+          <div class="chip" onclick="toggleChip(this)">Pet Services</div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Risk tolerance</label>
+        <div class="chip-group">
+          <div class="chip" onclick="selectRisk(this,'conservative')">Conservative</div>
+          <div class="chip" onclick="selectRisk(this,'moderate')">Moderate</div>
+          <div class="chip" onclick="selectRisk(this,'aggressive')">Aggressive</div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Target timeline</label>
+        <select id="inTimeline">
+          <option value="">Select timeline...</option>
+          <option value="3">Ready in 3 months</option>
+          <option value="6">3&ndash;6 months</option>
+          <option value="12">6&ndash;12 months</option>
+          <option value="12+">12+ months (exploring)</option>
+        </select>
+      </div>
+
+      <div class="alert-box success" style="margin-top:16px;">
+        <span>&#x1f512;</span>
+        <span>Stored locally in Vault 1 (encrypted). Zero data transmitted.</span>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Scout Discovery -->
+    <div class="screen" id="s2">
+      <div class="screen-title-area">
+        <div class="tag">Step 2 &mdash; Discovery</div>
+        <h2>Scout Agent is fetching franchises</h2>
+        <p class="subtitle">Pulling from all public sources. The query is generic &mdash; Scout doesn't know your profile.</p>
+      </div>
+
+      <div class="loading-bar"><div class="fill"></div></div>
+
+      <div class="stat-row">
+        <div class="stat-box"><div class="num" id="brandCount">0</div><div class="lbl">Brands Found</div></div>
+        <div class="stat-box"><div class="num">12</div><div class="lbl">Categories</div></div>
+        <div class="stat-box"><div class="num">6</div><div class="lbl">Sources</div></div>
+      </div>
+
+      <div class="alert-box info">
+        <span>&#x1f6e1;&#xfe0f;</span>
+        <span>Scout fetches ALL franchises, not just ones matching your profile. This broad fetch prevents inference attacks &mdash; no one can deduce your interests from the query.</span>
+      </div>
+
+      <div class="divider"></div>
+      <div class="tag">Sources queried</div>
+      <div class="check-item"><div class="ck checked">&#x2713;</div> Franchise Direct (340 brands)</div>
+      <div class="check-item"><div class="ck checked">&#x2713;</div> FranNet Database (280 brands)</div>
+      <div class="check-item"><div class="ck checked">&#x2713;</div> Franchise Gator (210 brands)</div>
+      <div class="check-item"><div class="ck checked">&#x2713;</div> IFA Directory (175 brands)</div>
+      <div class="check-item"><div class="ck checked">&#x2713;</div> State Registrations (90 brands)</div>
+      <div class="check-item"><div class="ck checked">&#x2713;</div> FDD Repository (55 brands)</div>
+    </div>
+
+    <!-- SCREEN 3: Matcher Results -->
+    <div class="screen" id="s3">
+      <div class="screen-title-area">
+        <div class="tag">Step 3 &mdash; Your Matches</div>
+        <h2>Matcher scored every franchise locally</h2>
+        <p class="subtitle">Air-gapped &mdash; no network socket. Full profile access on your device only.</p>
+      </div>
+
+      <div class="alert-box success" style="margin-bottom:16px;">
+        <span>&#x1f512;</span>
+        <span>Scoring ran entirely on your device. No franchise knows they were evaluated.</span>
+      </div>
+
+      <div id="matchList"></div>
+    </div>
+
+    <!-- SCREEN 4: Select Deep Dives -->
+    <div class="screen" id="s4">
+      <div class="screen-title-area">
+        <div class="tag">Step 4 &mdash; Choose Deep Dives</div>
+        <h2>Select franchises for full analysis</h2>
+        <p class="subtitle">Pick 3&ndash;5 brands. The Analyst will pull FDDs, litigation, and financials.</p>
+      </div>
+
+      <div class="alert-box info" style="margin-bottom:16px;">
+        <span>&#x1f4a1;</span>
+        <span>Analyst asks for info by brand name only &mdash; "Tell me about Brand X." Not "Is Brand X good for someone with $200K."</span>
+      </div>
+
+      <div id="selectList"></div>
+
+      <div style="text-align:center;margin-top:12px;font-size:0.8rem;color:var(--t3);">
+        <span id="selectCount">0</span> of 5 selected
+      </div>
+    </div>
+
+    <!-- SCREEN 5: Due Diligence -->
+    <div class="screen" id="s5">
+      <div class="screen-title-area">
+        <div class="tag">Step 5 &mdash; Due Diligence</div>
+        <h2>Analyst Agent: FDD Intelligence</h2>
+        <p class="subtitle">Deep dive into your selected franchises. FDDs, litigation, unit economics.</p>
+      </div>
+
+      <div class="loading-bar"><div class="fill"></div></div>
+
+      <!-- Example FDD Report for first selected -->
+      <div id="fddReport">
+        <div class="card" style="border-left:3px solid var(--teal);cursor:default;">
+          <div class="card-row">
+            <div class="card-icon" style="background:rgba(20,184,166,.12);">&#x1f4cb;</div>
+            <div class="card-body">
+              <div class="card-title" id="fddBrandName">The Joint Chiropractic</div>
+              <div class="card-sub">2024 FDD &middot; 248 pages analyzed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tag" style="margin-top:16px;">Key FDD Items</div>
+
+        <div class="info-row"><span class="label">Item 5 &mdash; Initial Fees</span><span class="value">$39,900</span></div>
+        <div class="info-row"><span class="label">Item 6 &mdash; Royalty</span><span class="value">7% gross revenue</span></div>
+        <div class="info-row"><span class="label">Item 6 &mdash; Ad Fund</span><span class="value">2% gross revenue</span></div>
+        <div class="info-row"><span class="label">Item 7 &mdash; Total Investment</span><span class="value">$257K &ndash; $461K</span></div>
+        <div class="info-row"><span class="label">Item 19 &mdash; Avg Revenue</span><span class="value" style="color:var(--green);">$592K / year</span></div>
+        <div class="info-row"><span class="label">Item 20 &mdash; Units Open</span><span class="value">920 (+87 YoY)</span></div>
+        <div class="info-row"><span class="label">Item 20 &mdash; Units Closed</span><span class="value" style="color:var(--red);">23 (2.5%)</span></div>
+
+        <div class="tag" style="margin-top:16px;">Red Flag Scan</div>
+
+        <div class="flag-ok">
+          <span class="icon">&#x2705;</span>
+          <span>Closure rate 2.5% &mdash; well below 10% threshold</span>
+        </div>
+        <div class="flag-ok">
+          <span class="icon">&#x2705;</span>
+          <span>Royalty 7% &mdash; within industry normal (5-8%)</span>
+        </div>
+        <div class="flag-item">
+          <span class="icon">&#x26a0;&#xfe0f;</span>
+          <span>Item 3 &mdash; 4 pending litigation cases. Review recommended before proceeding.</span>
+        </div>
+        <div class="flag-ok">
+          <span class="icon">&#x2705;</span>
+          <span>Consistent unit growth over 3 years (+87, +72, +65)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: Finance Modeling -->
+    <div class="screen" id="s6">
+      <div class="screen-title-area">
+        <div class="tag">Step 6 &mdash; Financial Modeling</div>
+        <h2>Finance Agent: Affordability Analysis</h2>
+        <p class="subtitle">Air-gapped. Uses your financials locally. Never contacts lenders.</p>
+      </div>
+
+      <div class="alert-box warn" style="margin-bottom:16px;">
+        <span>&#x1f512;</span>
+        <span>Your financial data stays in Vault 2. The Finance Agent has no network access.</span>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--amber);cursor:default;">
+        <div class="card-title" id="financeBrandName">The Joint Chiropractic</div>
+        <div class="card-sub">Investment: $257K &ndash; $461K &middot; Avg Revenue: $592K/yr</div>
+      </div>
+
+      <div class="tag" style="margin-top:16px;">Financing Scenarios</div>
+
+      <div class="comp-row">
+        <div class="comp-col" style="border-color:rgba(20,184,166,.2);">
+          <h4 style="color:var(--teal);">SBA 7(a) Loan</h4>
+          <div class="big" style="color:var(--teal);">$340K</div>
+          <div class="sm">10yr @ 7.5% &bull; $4,028/mo</div>
+          <div style="margin-top:8px;font-size:0.7rem;color:var(--t3);">Down: $85K (25%)</div>
+        </div>
+        <div class="comp-col" style="border-color:rgba(168,85,247,.2);">
+          <h4 style="color:var(--purple);">ROBS 401(k)</h4>
+          <div class="big" style="color:var(--purple);">$280K</div>
+          <div class="sm">No monthly payment</div>
+          <div style="margin-top:8px;font-size:0.7rem;color:var(--t3);">Uses retirement funds</div>
+        </div>
+        <div class="comp-col" style="border-color:rgba(59,130,246,.2);">
+          <h4 style="color:var(--blue);">Equity</h4>
+          <div class="big" style="color:var(--blue);">$350K</div>
+          <div class="sm">Full cash investment</div>
+          <div style="margin-top:8px;font-size:0.7rem;color:var(--t3);">Max ownership</div>
+        </div>
+      </div>
+
+      <div class="tag" style="margin-top:16px;">Projected Returns (SBA Scenario)</div>
+
+      <div class="info-row"><span class="label">Year 1 Revenue (est.)</span><span class="value">$420K</span></div>
+      <div class="info-row"><span class="label">Year 1 Net (after debt service)</span><span class="value" style="color:var(--amber);">$38K</span></div>
+      <div class="info-row"><span class="label">Year 2 Revenue (est.)</span><span class="value">$540K</span></div>
+      <div class="info-row"><span class="label">Year 2 Net</span><span class="value" style="color:var(--green);">$87K</span></div>
+      <div class="info-row"><span class="label">Break-even</span><span class="value" style="color:var(--teal);">~14 months</span></div>
+      <div class="info-row"><span class="label">5-Year ROI</span><span class="value" style="color:var(--green);">186%</span></div>
+
+      <div class="alert-box info" style="margin-top:16px;">
+        <span>&#x1f4a1;</span>
+        <span>When you're ready to pursue financing, YOU generate a packet and share it with the lender of your choice. The system never automates this step.</span>
+      </div>
+    </div>
+
+    <!-- SCREEN 7: Finalists Comparison -->
+    <div class="screen" id="s7">
+      <div class="screen-title-area">
+        <div class="tag">Step 7 &mdash; Compare Finalists</div>
+        <h2>Your Top Picks Side by Side</h2>
+        <p class="subtitle">Narrow down to your finalists based on match score, financials, and due diligence.</p>
+      </div>
+
+      <div id="finalistCards"></div>
+
+      <div class="tag" style="margin-top:16px;">Quick Comparison</div>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.75rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px;color:var(--t3);"></td>
+              <td style="padding:8px;font-weight:700;color:var(--teal);" id="fin1Name">Brand 1</td>
+              <td style="padding:8px;font-weight:700;color:var(--blue);" id="fin2Name">Brand 2</td>
+            </tr>
+          </thead>
+          <tbody style="color:var(--t2);">
+            <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;color:var(--t3);">Match</td><td style="padding:8px;" id="fin1Score">94%</td><td style="padding:8px;" id="fin2Score">91%</td></tr>
+            <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;color:var(--t3);">Investment</td><td style="padding:8px;" id="fin1Inv">$257-461K</td><td style="padding:8px;" id="fin2Inv">$150-280K</td></tr>
+            <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;color:var(--t3);">Avg Rev</td><td style="padding:8px;" id="fin1Rev">$592K</td><td style="padding:8px;" id="fin2Rev">$480K</td></tr>
+            <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;color:var(--t3);">Royalty</td><td style="padding:8px;">7%</td><td style="padding:8px;">6%</td></tr>
+            <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;color:var(--t3);">Closures</td><td style="padding:8px;">2.5%</td><td style="padding:8px;">1.8%</td></tr>
+            <tr><td style="padding:8px;color:var(--t3);">Red Flags</td><td style="padding:8px;color:var(--amber);">1</td><td style="padding:8px;color:var(--green);">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SCREEN 8: Connector -->
+    <div class="screen" id="s8">
+      <div class="screen-title-area">
+        <div class="tag">Step 8 &mdash; Application Prep</div>
+        <h2>Connector Agent: Ready to Reach Out</h2>
+        <p class="subtitle">Application requirements fetched. Draft inquiry letters prepared. Connector doesn't know your identity.</p>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--blue);cursor:default;" id="connectorCard1">
+        <div class="card-title" style="color:var(--teal);" id="connBrand1">The Joint Chiropractic</div>
+        <div class="card-sub" style="margin-bottom:12px;">Application requirements retrieved</div>
+
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Franchise application form (PDF)</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Minimum net worth: $500K</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Minimum liquid capital: $150K</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Territory availability checked</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Draft inquiry letter prepared</div>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--blue);cursor:default;" id="connectorCard2">
+        <div class="card-title" style="color:var(--blue);" id="connBrand2">Stretch Zone</div>
+        <div class="card-sub" style="margin-bottom:12px;">Application requirements retrieved</div>
+
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Online application portal identified</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Minimum net worth: $300K</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Minimum liquid capital: $100K</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Discovery Day info retrieved</div>
+        <div class="check-item"><div class="ck checked">&#x2713;</div> Draft inquiry letter prepared</div>
+      </div>
+
+      <div class="tag" style="margin-top:16px;">Draft Inquiry Letter</div>
+      <div class="card" style="font-size:0.8rem;color:var(--t2);line-height:1.7;cursor:default;font-style:italic;">
+        "Dear Franchise Development Team,<br><br>
+        I am interested in learning more about franchise opportunities with [Brand Name] in the [Your City] area. I have reviewed publicly available information and would like to schedule an introductory call to discuss territory availability and next steps.<br><br>
+        I look forward to hearing from you.<br><br>
+        Best regards,<br>
+        [Your Name]"
+      </div>
+
+      <div class="alert-box warn" style="margin-top:16px;">
+        <span>&#x26a0;&#xfe0f;</span>
+        <span>This letter is a template. YOU fill in your name and details. YOU decide when and how to send it. The system prepares &mdash; you execute.</span>
+      </div>
+    </div>
+
+    <!-- SCREEN 9: Decision -->
+    <div class="screen" id="s9">
+      <div class="screen-title-area" style="text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">&#x1f3c6;</div>
+        <h1>You're Ready to<br><span class="gradient">Make Contact</span></h1>
+        <p class="subtitle" style="max-width:300px;margin:8px auto 0;">You've done deep research. You know more about these franchises than they know about you.</p>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box"><div class="num">775+</div><div class="lbl">Screened</div></div>
+        <div class="stat-box"><div class="num" id="finalMatchCount">5</div><div class="lbl">Analyzed</div></div>
+        <div class="stat-box"><div class="num">2</div><div class="lbl">Finalists</div></div>
+      </div>
+
+      <div class="alert-box success" style="margin-bottom:16px;">
+        <span>&#x1f6e1;&#xfe0f;</span>
+        <span><strong>Zero personal data transmitted</strong> during this entire process. Franchisors know nothing about you until YOU choose to reach out.</span>
+      </div>
+
+      <div class="tag">Your Next Steps (You Control These)</div>
+
+      <div class="check-item" onclick="toggleCheck(this)"><div class="ck">&#x2713;</div> Review and personalize inquiry letters</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="ck">&#x2713;</div> Send inquiry to finalist #1 from YOUR email</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="ck">&#x2713;</div> Send inquiry to finalist #2 from YOUR email</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="ck">&#x2713;</div> Schedule Discovery Day calls</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="ck">&#x2713;</div> Generate financing packet (when ready)</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="ck">&#x2713;</div> Share financing packet with chosen lender</div>
+
+      <div style="text-align:center;margin-top:24px;padding:20px;background:rgba(20,184,166,.05);border:1px solid rgba(20,184,166,.15);border-radius:14px;">
+        <div style="font-size:0.9rem;color:var(--teal);font-weight:700;margin-bottom:6px;">The Power Shift</div>
+        <div style="font-size:0.8rem;color:var(--t2);line-height:1.6;">In the old model, franchisors had your full profile before first contact.<br>Now <strong>you</strong> have deep intelligence on <strong>them</strong> &mdash; and they know nothing about you.</div>
+      </div>
+    </div>
+
+  </div><!-- /screen-area -->
+
+  <!-- Bottom Actions -->
+  <div class="bottom-bar" id="bottomBar">
+    <button class="btn-primary" id="nextBtn" onclick="nextScreen()">Get Started</button>
+    <button class="btn-secondary" id="backBtn" onclick="prevScreen()" style="display:none;">Back</button>
+  </div>
+</div>
+
+<script>
+// ─── State ──────────────────────────────────────────────
+let current = 0;
+const TOTAL = 10;
+
+const SCREENS = [
+  { agent:'Welcome',         agentClass:'local',    agentLabel:'&#x1f916; Welcome',                    btn:'Get Started',            privacy:'All Data Local' },
+  { agent:'Educator',        agentClass:'local',    agentLabel:'&#x1f393; Educator &middot; Local',    btn:'Find Franchises',        privacy:'All Data Local' },
+  { agent:'Scout',           agentClass:'outbound', agentLabel:'&#x1f50d; Scout &middot; No PII',      btn:'See My Matches',         privacy:'0 PII Transmitted' },
+  { agent:'Matcher',         agentClass:'airgap',   agentLabel:'&#x1f3af; Matcher &middot; Air-Gapped',btn:'Select Deep Dives',      privacy:'Scored Locally' },
+  { agent:'User Decision',   agentClass:'user',     agentLabel:'&#x1f464; Your Choice',                btn:'Run Analysis',           privacy:'All Data Local' },
+  { agent:'Analyst',         agentClass:'outbound', agentLabel:'&#x1f4ca; Analyst &middot; No PII',    btn:'Model Finances',         privacy:'Brand Names Only' },
+  { agent:'Finance',         agentClass:'airgap',   agentLabel:'&#x1f4b0; Finance &middot; Air-Gapped',btn:'Compare Finalists',      privacy:'Air-Gapped' },
+  { agent:'User Decision',   agentClass:'user',     agentLabel:'&#x1f464; Your Choice',                btn:'Prepare Applications',   privacy:'All Data Local' },
+  { agent:'Connector',       agentClass:'outbound', agentLabel:'&#x1f517; Connector &middot; No PII',  btn:'View Action Plan',       privacy:'No Identity Sent' },
+  { agent:'You',             agentClass:'user',     agentLabel:'&#x1f3c6; You Decide',                 btn:'Start Over',             privacy:'0 Data Transmitted' },
+];
+
+// Mock franchise data
+const BRANDS = [
+  { name:'The Joint Chiropractic', cat:'Health & Wellness', inv:'$257K–$461K', rev:'$592K', score:94, icon:'&#x1f9d1;&#x200d;&#x2695;&#xfe0f;', color:'var(--teal)' },
+  { name:'Stretch Zone',           cat:'Health & Fitness',  inv:'$150K–$280K', rev:'$480K', score:91, icon:'&#x1f9d8;',     color:'var(--blue)' },
+  { name:'FASTSIGNS',              cat:'B2B Services',      inv:'$233K–$307K', rev:'$820K', score:88, icon:'&#x1f3a8;',     color:'var(--purple)' },
+  { name:'Kumon',                  cat:'Education',         inv:'$73K–$155K',  rev:'$420K', score:86, icon:'&#x1f4da;',     color:'var(--amber)' },
+  { name:'Mosquito Joe',           cat:'Home Services',     inv:'$106K–$142K', rev:'$350K', score:84, icon:'&#x1f41d;',     color:'var(--green)' },
+  { name:'Camp Bow Wow',           cat:'Pet Services',      inv:'$1.1M–$1.7M',rev:'$980K', score:81, icon:'&#x1f436;',     color:'var(--amber)' },
+  { name:'Mathnasium',             cat:'Education',         inv:'$113K–$149K', rev:'$380K', score:79, icon:'&#x2795;',      color:'var(--blue)' },
+  { name:'Sport Clips',            cat:'Personal Care',     inv:'$267K–$390K', rev:'$440K', score:77, icon:'&#x2702;&#xfe0f;', color:'var(--teal)' },
+  { name:'Painting with a Twist',  cat:'Entertainment',     inv:'$99K–$195K',  rev:'$320K', score:74, icon:'&#x1f3a8;',     color:'var(--purple)' },
+  { name:'Two Maids',              cat:'Home Services',     inv:'$82K–$145K',  rev:'$510K', score:72, icon:'&#x1f3e0;',     color:'var(--green)' },
+];
+
+let selected = new Set();
+
+// ─── Rendering ──────────────────────────────────────────
+function renderProgress() {
+  const el = document.getElementById('progressSteps');
+  el.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const s = document.createElement('div');
+    s.className = 'progress-step' + (i < current ? ' done' : '') + (i === current ? ' active' : '');
+    el.appendChild(s);
+  }
+  document.getElementById('stepLabel').textContent = `Step ${current + 1} of ${TOTAL}`;
+
+  const sc = SCREENS[current];
+  document.getElementById('agentBadge').className = 'agent-active ' + sc.agentClass;
+  document.getElementById('agentBadge').innerHTML = sc.agentLabel;
+  document.getElementById('nextBtn').textContent = sc.btn;
+  document.getElementById('backBtn').style.display = current > 0 ? 'block' : 'none';
+  document.getElementById('privacyLabel').textContent = sc.privacy;
+}
+
+function renderMatches() {
+  const el = document.getElementById('matchList');
+  el.innerHTML = '';
+  BRANDS.forEach((b, i) => {
+    const ringBg = b.score >= 90 ? 'rgba(20,184,166,.12)' : b.score >= 80 ? 'rgba(59,130,246,.12)' : 'rgba(148,163,184,.08)';
+    const ringCol = b.score >= 90 ? 'var(--teal)' : b.score >= 80 ? 'var(--blue)' : 'var(--t3)';
+    el.innerHTML += `
+      <div class="card" style="cursor:default;">
+        <div class="card-row">
+          <div class="score-ring" style="background:${ringBg};color:${ringCol};">${b.score}</div>
+          <div class="card-body">
+            <div class="card-title">${b.name}</div>
+            <div class="card-sub">${b.cat} &middot; ${b.inv}</div>
+            <div style="margin-top:4px;"><span class="badge badge-${b.score>=90?'teal':b.score>=80?'blue':'amber'}">${b.score>=90?'Excellent Match':b.score>=80?'Strong Match':'Good Match'}</span></div>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+function renderSelectList() {
+  const el = document.getElementById('selectList');
+  el.innerHTML = '';
+  BRANDS.slice(0, 8).forEach((b, i) => {
+    const sel = selected.has(i);
+    el.innerHTML += `
+      <div class="card ${sel?'selected':''}" onclick="toggleSelect(${i})">
+        <div class="card-row">
+          <div class="score-ring" style="background:${sel?'rgba(20,184,166,.15)':'rgba(148,163,184,.05)'};color:${sel?'var(--teal)':'var(--t3)'};">${sel?'&#x2713;':b.score}</div>
+          <div class="card-body">
+            <div class="card-title">${b.name}</div>
+            <div class="card-sub">${b.cat} &middot; ${b.inv} &middot; Rev: ${b.rev}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+  document.getElementById('selectCount').textContent = selected.size;
+}
+
+function renderFinalists() {
+  const picks = [...selected].slice(0, 2).map(i => BRANDS[i]);
+  if (picks.length < 2) { picks.push(BRANDS[0]); if (picks.length < 2) picks.push(BRANDS[1]); }
+
+  const el = document.getElementById('finalistCards');
+  el.innerHTML = '';
+  picks.forEach((b, i) => {
+    const col = i === 0 ? 'var(--teal)' : 'var(--blue)';
+    el.innerHTML += `
+      <div class="card" style="border-left:3px solid ${col};cursor:default;">
+        <div class="card-row">
+          <div class="score-ring" style="background:rgba(20,184,166,.12);color:${col};">${b.score}</div>
+          <div class="card-body">
+            <div class="card-title">${b.name}</div>
+            <div class="card-sub">${b.cat} &middot; ${b.inv} &middot; Rev: ${b.rev}/yr</div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('fin1Name').textContent = picks[0].name;
+  document.getElementById('fin2Name').textContent = picks[1].name;
+  document.getElementById('fin1Score').textContent = picks[0].score + '%';
+  document.getElementById('fin2Score').textContent = picks[1].score + '%';
+  document.getElementById('fin1Inv').textContent = picks[0].inv;
+  document.getElementById('fin2Inv').textContent = picks[1].inv;
+  document.getElementById('fin1Rev').textContent = picks[0].rev;
+  document.getElementById('fin2Rev').textContent = picks[1].rev;
+
+  // Update connector screen too
+  document.getElementById('connBrand1').textContent = picks[0].name;
+  document.getElementById('connBrand2').textContent = picks[1].name;
+  document.getElementById('fddBrandName').textContent = picks[0].name;
+  document.getElementById('financeBrandName').textContent = picks[0].name;
+}
+
+// ─── Interactions ───────────────────────────────────────
+function toggleChip(el) { el.classList.toggle('active'); }
+
+function selectRisk(el, level) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function updateProfile() {}
+
+function toggleSelect(i) {
+  if (selected.has(i)) selected.delete(i);
+  else if (selected.size < 5) selected.add(i);
+  renderSelectList();
+}
+
+function toggleCheck(el) {
+  el.querySelector('.ck').classList.toggle('checked');
+}
+
+// ─── Navigation ─────────────────────────────────────────
+function showScreen(idx) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s' + idx).classList.add('active');
+  document.querySelector('.screen-area').scrollTop = 0;
+  current = idx;
+  renderProgress();
+
+  // Trigger screen-specific renders
+  if (idx === 2) animateBrandCount();
+  if (idx === 3) renderMatches();
+  if (idx === 4) renderSelectList();
+  if (idx === 7) renderFinalists();
+}
+
+function nextScreen() {
+  if (current === 9) { showScreen(0); selected.clear(); return; }
+  if (current === 4 && selected.size === 0) { selected.add(0); selected.add(1); selected.add(2); }
+  showScreen(current + 1);
+}
+
+function prevScreen() {
+  if (current > 0) showScreen(current - 1);
+}
+
+function animateBrandCount() {
+  const el = document.getElementById('brandCount');
+  let n = 0;
+  const target = 782;
+  const step = Math.ceil(target / 40);
+  const iv = setInterval(() => {
+    n += step;
+    if (n >= target) { n = target; clearInterval(iv); }
+    el.textContent = n;
+  }, 50);
+}
+
+// Init
+renderProgress();
+</script>
+
+</body>
+</html>

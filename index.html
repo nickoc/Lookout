@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local-First AI Agents for Franchise Discovery</title>
+<meta name="description" content="Your data stays home. Your agents go to work. AI-powered franchise discovery that keeps your personal information private.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0b1120;
+    --bg-secondary: #111827;
+    --bg-card: #1a2332;
+    --bg-card-hover: #1f2b3d;
+    --border: rgba(148, 163, 184, 0.1);
+    --border-hover: rgba(148, 163, 184, 0.2);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-teal: #14b8a6;
+    --accent-teal-glow: rgba(20, 184, 166, 0.15);
+    --accent-blue: #3b82f6;
+    --accent-purple: #a855f7;
+    --accent-amber: #f59e0b;
+    --accent-green: #22c55e;
+    --accent-red: #ef4444;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Navigation ──────────────────────────────────────── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(11, 17, 32, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+
+  nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .nav-logo {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .nav-cta {
+    background: var(--accent-teal);
+    color: var(--bg-primary);
+    padding: 8px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .nav-cta:hover {
+    background: #0d9488;
+    transform: translateY(-1px);
+  }
+
+  /* ─── Hero ──────────────────────────────────────────────── */
+  .hero {
+    padding: 160px 0 100px;
+    text-align: center;
+  }
+
+  .coming-soon-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(20, 184, 166, 0.1);
+    border: 1px solid rgba(20, 184, 166, 0.3);
+    color: var(--accent-teal);
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 32px;
+    animation: pulse-badge 3s ease-in-out infinite;
+  }
+
+  .coming-soon-badge .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-teal);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.1); }
+    50% { box-shadow: 0 0 0 8px rgba(20, 184, 166, 0); }
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -0.03em;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    color: var(--text-secondary);
+    max-width: 640px;
+    margin: 0 auto 16px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .hero-tagline {
+    font-size: 1rem;
+    color: var(--accent-teal);
+    font-weight: 500;
+    margin-bottom: 48px;
+  }
+
+  /* ─── Stats Bar ──────────────────────────────────────── */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-bottom: 56px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-teal);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  /* ─── Waitlist Form ─────────────────────────────────── */
+  .waitlist-form {
+    display: flex;
+    gap: 12px;
+    max-width: 480px;
+    margin: 0 auto 16px;
+  }
+
+  .waitlist-form input[type="email"] {
+    flex: 1;
+    padding: 14px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .waitlist-form input[type="email"]:focus {
+    border-color: var(--accent-teal);
+  }
+
+  .waitlist-form input[type="email"]::placeholder {
+    color: var(--text-muted);
+  }
+
+  .waitlist-form button {
+    padding: 14px 28px;
+    background: var(--accent-teal);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .waitlist-form button:hover {
+    background: #0d9488;
+    transform: translateY(-1px);
+  }
+
+  .waitlist-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .form-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    background: rgba(20, 184, 166, 0.1);
+    border: 1px solid rgba(20, 184, 166, 0.3);
+    border-radius: 12px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .form-success.visible { display: block; }
+
+  .form-success h3 {
+    color: var(--accent-teal);
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  .form-success p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* ─── Section Styles ────────────────────────────────── */
+  section {
+    padding: 100px 0;
+  }
+
+  .section-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+
+  .tag-red { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+  .tag-teal { background: rgba(20, 184, 166, 0.15); color: var(--accent-teal); }
+  .tag-blue { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+  .tag-purple { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+  .tag-amber { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .section-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    font-weight: 300;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .section-header .section-subtitle {
+    margin: 0 auto;
+  }
+
+  /* ─── Problem Section ────────────────────────────────── */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 48px;
+  }
+
+  .problem-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .problem-card.bad {
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .problem-card.good {
+    border-color: rgba(20, 184, 166, 0.2);
+  }
+
+  .problem-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .problem-card.bad h3 { color: var(--accent-red); }
+  .problem-card.good h3 { color: var(--accent-teal); }
+
+  .problem-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .problem-card .quote {
+    font-style: italic;
+    color: var(--text-muted);
+    border-left: 2px solid;
+    padding-left: 16px;
+    margin-top: 16px;
+    font-size: 0.9rem;
+  }
+
+  .problem-card.bad .quote { border-color: rgba(239, 68, 68, 0.3); }
+  .problem-card.good .quote { border-color: rgba(20, 184, 166, 0.3); }
+
+  /* ─── Agent Cards ────────────────────────────────────── */
+  .agent-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .agent-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    transition: all 0.3s;
+  }
+
+  .agent-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .agent-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+  }
+
+  .agent-name {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .agent-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .agent-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-outbound {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+  }
+
+  .badge-airgap {
+    background: rgba(168, 85, 247, 0.15);
+    color: var(--accent-purple);
+  }
+
+  .badge-local {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--accent-green);
+  }
+
+  /* ─── Differentiators ──────────────────────────────── */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .diff-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    border-left: 3px solid;
+    transition: all 0.3s;
+  }
+
+  .diff-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .diff-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .diff-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ─── Privacy Wall Visual ──────────────────────────── */
+  .privacy-visual {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 48px 0;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .pv-zone {
+    flex: 1;
+    padding: 32px;
+  }
+
+  .pv-local {
+    background: rgba(20, 184, 166, 0.05);
+    border-right: 3px solid var(--accent-teal);
+  }
+
+  .pv-wall {
+    width: 60px;
+    background: linear-gradient(180deg, var(--accent-teal), var(--accent-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--bg-primary);
+  }
+
+  .pv-public {
+    background: rgba(59, 130, 246, 0.05);
+    border-left: 3px solid var(--accent-blue);
+  }
+
+  .pv-zone h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .pv-local h4 { color: var(--accent-teal); }
+  .pv-public h4 { color: var(--accent-blue); }
+
+  .pv-item {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pv-item:last-child { border-bottom: none; }
+
+  /* ─── Bottom CTA ─────────────────────────────────────── */
+  .bottom-cta {
+    text-align: center;
+    padding: 80px 0 120px;
+    background: linear-gradient(180deg, transparent, rgba(20, 184, 166, 0.03));
+  }
+
+  .bottom-cta h2 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  .bottom-cta p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 36px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ─── Footer ────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0;
+    text-align: center;
+  }
+
+  footer p {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  /* ─── Fade-in Animations ─────────────────────────────── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── Responsive ─────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .hero { padding: 120px 0 60px; }
+    .stats-bar { gap: 24px; }
+    .stat-value { font-size: 1.5rem; }
+    .waitlist-form { flex-direction: column; }
+    .waitlist-form button { width: 100%; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .agent-grid { grid-template-columns: 1fr; }
+    .diff-grid { grid-template-columns: 1fr; }
+    .privacy-visual { flex-direction: column; }
+    .pv-wall {
+      width: 100%;
+      height: 40px;
+      writing-mode: horizontal-tb;
+    }
+    .pv-local { border-right: none; border-bottom: 3px solid var(--accent-teal); }
+    .pv-public { border-left: none; border-top: 3px solid var(--accent-blue); }
+    section { padding: 60px 0; }
+  }
+
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 2rem; }
+    .stats-bar { gap: 16px; }
+    .stat { min-width: 80px; }
+    nav .container { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="container">
+    <a href="#" class="nav-brand">
+      <div class="nav-logo">&#x1f916;</div>
+      FranchiseAI
+    </a>
+    <a href="#waitlist" class="nav-cta">Join the Waitlist</a>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="coming-soon-badge fade-in">
+      <span class="dot"></span>
+      Coming Soon
+    </div>
+
+    <h1 class="fade-in">
+      AI-Powered Franchise Discovery<br>
+      That <span class="gradient-text">Keeps Your Data Private</span>
+    </h1>
+
+    <p class="hero-subtitle fade-in">
+      Six specialized AI agents research franchises, analyze FDDs, model financing, and find your perfect match &mdash; all without your personal information ever leaving your device.
+    </p>
+
+    <p class="hero-tagline fade-in">Your data stays home. Your agents go to work.</p>
+
+    <div class="stats-bar fade-in">
+      <div class="stat">
+        <div class="stat-value">0</div>
+        <div class="stat-label">User Data Transmitted</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Specialized Agents</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">4</div>
+        <div class="stat-label">Encrypted Vaults</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">775+</div>
+        <div class="stat-label">Franchises Analyzed</div>
+      </div>
+    </div>
+
+    <div id="waitlist">
+      <div id="waitlistForm">
+        <form class="waitlist-form fade-in" onsubmit="handleWaitlist(event)">
+          <input type="email" id="emailInput" placeholder="Enter your email address" required aria-label="Email address">
+          <button type="submit" id="submitBtn">Join Waitlist</button>
+        </form>
+        <p class="form-note fade-in">The sooner you sign up, the sooner you get access. No spam, ever.</p>
+      </div>
+      <div class="form-success fade-in" id="formSuccess">
+        <h3>You're on the list!</h3>
+        <p>We'll notify you as soon as early access is available. The earlier you signed up, the sooner you'll get in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Problem Section -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-red">The Problem</span>
+      <h2 class="section-title">Franchise Discovery Is Broken</h2>
+      <p class="section-subtitle">Current platforms make you trade your most sensitive data for basic information that's already public.</p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card bad fade-in">
+        <h3>The Current Model</h3>
+        <p>Take a 5-minute quiz. Share your finances, goals, location, family situation, net worth. The platform matches you &mdash; but the franchisors who pay the most get priority placement.</p>
+        <div class="quote">"Give us your data, and we'll find you a franchise."</div>
+      </div>
+      <div class="problem-card good fade-in">
+        <h3>The Local-First Model</h3>
+        <p>Your AI agents fetch all public franchise data. Your profile stays on your machine. Matching happens locally with zero conflicts of interest. You decide what to share and when.</p>
+        <div class="quote">"Keep your data, and your agents will find you a franchise."</div>
+      </div>
+    </div>
+
+    <!-- Privacy Wall Visual -->
+    <div class="privacy-visual fade-in">
+      <div class="pv-zone pv-local">
+        <h4>Your Device (Private)</h4>
+        <div class="pv-item">&#x1f512; Your financial profile</div>
+        <div class="pv-item">&#x1f512; Your goals &amp; preferences</div>
+        <div class="pv-item">&#x1f512; Match scores &amp; rankings</div>
+        <div class="pv-item">&#x1f512; Financing models</div>
+        <div class="pv-item">&#x1f512; Decision history</div>
+      </div>
+      <div class="pv-wall">Privacy Wall</div>
+      <div class="pv-zone pv-public">
+        <h4>Public Internet (Fetched)</h4>
+        <div class="pv-item">&#x1f310; Franchise listings</div>
+        <div class="pv-item">&#x1f310; FDD documents</div>
+        <div class="pv-item">&#x1f310; Investment ranges</div>
+        <div class="pv-item">&#x1f310; Litigation records</div>
+        <div class="pv-item">&#x1f310; Application requirements</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Agents Section -->
+<section style="background: var(--bg-secondary);">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-teal">The Agents</span>
+      <h2 class="section-title">Six Agents, Strict Boundaries</h2>
+      <p class="section-subtitle">Each agent has a specific job and strict data access rules. Outbound agents never see your profile. Air-gapped agents never touch the network.</p>
+    </div>
+
+    <div class="agent-grid">
+      <div class="agent-card fade-in">
+        <div class="agent-icon" style="background: rgba(59, 130, 246, 0.15);">&#x1f50d;</div>
+        <div class="agent-name">Scout Agent</div>
+        <div class="agent-desc">Discovers franchise opportunities from every public source. Fetches 775+ listings. Doesn't know your name.</div>
+        <span class="agent-badge badge-outbound">Outbound &middot; No PII</span>
+      </div>
+
+      <div class="agent-card fade-in">
+        <div class="agent-icon" style="background: rgba(168, 85, 247, 0.15);">&#x1f4ca;</div>
+        <div class="agent-name">Analyst Agent</div>
+        <div class="agent-desc">Deep due diligence: FDDs, litigation, unit economics, competitive analysis. Receives brand names only.</div>
+        <span class="agent-badge badge-outbound">Outbound &middot; No PII</span>
+      </div>
+
+      <div class="agent-card fade-in">
+        <div class="agent-icon" style="background: rgba(20, 184, 166, 0.15);">&#x1f3af;</div>
+        <div class="agent-name">Matcher Agent</div>
+        <div class="agent-desc">Scores franchise-user fit using local LLM. Full profile access. Air-gapped &mdash; no network socket.</div>
+        <span class="agent-badge badge-airgap">Local Only &middot; Air-Gapped</span>
+      </div>
+
+      <div class="agent-card fade-in">
+        <div class="agent-icon" style="background: rgba(245, 158, 11, 0.15);">&#x1f4b0;</div>
+        <div class="agent-name">Finance Agent</div>
+        <div class="agent-desc">Loan modeling, ROI, cash flow scenarios. Uses your financials. Never contacts lenders.</div>
+        <span class="agent-badge badge-airgap">Local Only &middot; Air-Gapped</span>
+      </div>
+
+      <div class="agent-card fade-in">
+        <div class="agent-icon" style="background: rgba(59, 130, 246, 0.15);">&#x1f517;</div>
+        <div class="agent-name">Connector Agent</div>
+        <div class="agent-desc">Retrieves application requirements and contact info. Drafts inquiry letters. Doesn't know your identity.</div>
+        <span class="agent-badge badge-outbound">Outbound &middot; No PII</span>
+      </div>
+
+      <div class="agent-card fade-in">
+        <div class="agent-icon" style="background: rgba(34, 197, 94, 0.15);">&#x1f393;</div>
+        <div class="agent-name">Educator Agent</div>
+        <div class="agent-desc">Franchise education, decision frameworks, Q&A. Locally-cached content. No access to your financials.</div>
+        <span class="agent-badge badge-local">Local &middot; Goals Only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Differentiators Section -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-purple">Why It Matters</span>
+      <h2 class="section-title">What Local-First Makes Possible</h2>
+      <p class="section-subtitle">Four capabilities that are structurally impossible in any centralized model.</p>
+    </div>
+
+    <div class="diff-grid">
+      <div class="diff-card fade-in" style="border-left-color: var(--accent-teal);">
+        <h3 style="color: var(--accent-teal);">Honest Scoring</h3>
+        <p>No sponsor bias. No monetization pressure to rank paying brands higher. The algorithm serves only you, and you can inspect it yourself.</p>
+      </div>
+
+      <div class="diff-card fade-in" style="border-left-color: var(--accent-purple);">
+        <h3 style="color: var(--accent-purple);">Adversarial Due Diligence</h3>
+        <p>Pull litigation, complaints, and FDD red flags without any platform filtering. No structural conflict &mdash; when franchisors don't pay, the system is truly neutral.</p>
+      </div>
+
+      <div class="diff-card fade-in" style="border-left-color: var(--accent-blue);">
+        <h3 style="color: var(--accent-blue);">Cross-Platform Intelligence</h3>
+        <p>Not limited to one platform's catalog. Scout agents pull from Franchise Direct, FranNet, Franchise Gator, IFA, state registrations, and more.</p>
+      </div>
+
+      <div class="diff-card fade-in" style="border-left-color: var(--accent-amber);">
+        <h3 style="color: var(--accent-amber);">Reversed Information Asymmetry</h3>
+        <p>You have deep due diligence on the franchisor. They know nothing about you until you choose to share. That's a profound power shift for a $50K-$500K decision.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Bottom CTA -->
+<section class="bottom-cta">
+  <div class="container">
+    <h2 class="fade-in">Ready to Discover Franchises<br><span class="gradient-text">On Your Terms?</span></h2>
+    <p class="fade-in">Sign up now for early access. The sooner you join, the sooner you get in.</p>
+
+    <div id="waitlist2">
+      <div id="waitlistForm2">
+        <form class="waitlist-form fade-in" onsubmit="handleWaitlist2(event)">
+          <input type="email" id="emailInput2" placeholder="Enter your email address" required aria-label="Email address">
+          <button type="submit" id="submitBtn2">Join Waitlist</button>
+        </form>
+      </div>
+      <div class="form-success fade-in" id="formSuccess2">
+        <h3>You're on the list!</h3>
+        <p>We'll notify you as soon as early access is available.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p>&copy; 2026 FranchiseAI. Your data stays home. Your agents go to work.</p>
+  </div>
+</footer>
+
+<script>
+  // ─── Scroll animations ─────────────────────────────────
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // ─── Waitlist form handling ─────────────────────────────
+  function handleWaitlist(e) {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    submitWaitlist(email, 'waitlistForm', 'formSuccess');
+  }
+
+  function handleWaitlist2(e) {
+    e.preventDefault();
+    const email = document.getElementById('emailInput2').value;
+    submitWaitlist(email, 'waitlistForm2', 'formSuccess2');
+  }
+
+  function submitWaitlist(email, formId, successId) {
+    // Store locally (wire up to your backend: Supabase, Mailchimp, etc.)
+    const waitlist = JSON.parse(localStorage.getItem('franchise-ai-waitlist') || '[]');
+    waitlist.push({ email, timestamp: new Date().toISOString() });
+    localStorage.setItem('franchise-ai-waitlist', JSON.stringify(waitlist));
+
+    // Show success
+    document.getElementById(formId).style.display = 'none';
+    const success = document.getElementById(successId);
+    success.classList.add('visible');
+    success.style.display = 'block';
+
+    console.log('Waitlist signup:', email);
+  }
+
+  // ─── Smooth scroll for nav CTA ──────────────────────────
+  document.querySelector('.nav-cta').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+
+</body>
+</html>

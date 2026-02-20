@@ -39,6 +39,7 @@ export type FullProfile = {
   // Section 2: Preferences & Interests
   interests: string[];
   unitPreference: string;
+  growthStage: string;
   dayToDay: string;
   workLocation: string;
   franchiseModel: string[];
@@ -48,6 +49,7 @@ export type FullProfile = {
   education: string;
   currentWork: string;
   managementYears: string;
+  salesOrientation: string;
   employeeInterest: string;
   idealEmployeeCount: string;
   priorOwnership: string;
@@ -57,6 +59,7 @@ export type FullProfile = {
 
   // Section 4: Ownership Style
   style: string;
+  cultureFit: string;
   leadershipStyle: string;
   hoursYear1: string;
   hoursYear2: string;
@@ -82,10 +85,10 @@ export type FullProfile = {
 
 export const defaultProfile: FullProfile = {
   budget: "", netWorth: "", liquidCapital: "", creditScore: "", financingPreference: "",
-  interests: [], unitPreference: "", dayToDay: "", workLocation: "", franchiseModel: [],
-  ageGroup: "", education: "", currentWork: "", managementYears: "", employeeInterest: "",
-  idealEmployeeCount: "", priorOwnership: "", marketingLevel: "", operationsLevel: "", financeLevel: "",
-  style: "", leadershipStyle: "", hoursYear1: "", hoursYear2: "",
+  interests: [], unitPreference: "", growthStage: "", dayToDay: "", workLocation: "", franchiseModel: [],
+  ageGroup: "", education: "", currentWork: "", managementYears: "", salesOrientation: "",
+  employeeInterest: "", idealEmployeeCount: "", priorOwnership: "", marketingLevel: "", operationsLevel: "", financeLevel: "",
+  style: "", cultureFit: "", leadershipStyle: "", hoursYear1: "", hoursYear2: "",
   riskTolerance: "", exitStrategy: "", litigationTolerance: "", closedUnitsTolerance: "",
   passiveInvestor: "", timelineToOpen: "", location: "",
   commitmentLevel: "", consideringDuration: "", valuesImportance: "", coreValues: [],
@@ -194,6 +197,18 @@ export const sections: Section[] = [
         ],
       },
       {
+        id: "growthStage",
+        question: "What stage of franchise growth appeals to you most?",
+        subtitle: "Each stage has different risk, reward, and involvement levels.",
+        type: "single",
+        options: [
+          { value: "entrepreneur", label: "Entrepreneur (0–20 units)", desc: "First to market, better terms, fewer rules, say in policies" },
+          { value: "partner", label: "Partner (20–70 units)", desc: "Growing system, best practices, desirable markets still available" },
+          { value: "plug-and-play", label: "Plug & Play (70–300 units)", desc: "Proven systems, faster ramp-up, advisory boards, resales" },
+          { value: "empire", label: "Empire (300+ units)", desc: "Legacy brands, strong financials, brand equity, M&A potential" },
+        ],
+      },
+      {
         id: "dayToDay",
         question: "Who will run the day-to-day operations?",
         type: "single",
@@ -291,6 +306,17 @@ export const sections: Section[] = [
         ],
       },
       {
+        id: "salesOrientation",
+        question: "What's your natural sales approach?",
+        subtitle: "Every franchise involves some form of selling.",
+        type: "single",
+        options: [
+          { value: "consultative", label: "Consultative", desc: "Solution-based, build trust and credibility, long-term relationships" },
+          { value: "relational", label: "Relational", desc: "Networking, referrals, community-building" },
+          { value: "competitive", label: "Competitive", desc: "High-volume, results-driven, target-focused" },
+        ],
+      },
+      {
         id: "priorOwnership",
         question: "Have you owned and operated a business before?",
         type: "single",
@@ -356,6 +382,18 @@ export const sections: Section[] = [
           { value: "semi-absentee", label: "Semi-Absentee", desc: "Hire a manager, stay involved part-time" },
           { value: "multi-unit", label: "Multi-Unit", desc: "Scale to multiple locations" },
           { value: "home-based", label: "Home-Based", desc: "Run from home, lower overhead" },
+        ],
+      },
+      {
+        id: "cultureFit",
+        question: "What type of company culture do you thrive in?",
+        subtitle: "This helps match you with franchise systems that fit your natural environment.",
+        type: "single",
+        options: [
+          { value: "collaborate", label: "Collaborate", desc: "Family-like, teamwork, mentoring, loyalty, flexibility" },
+          { value: "create", label: "Create", desc: "Innovative, entrepreneurial, risk-taking, agile, visionary" },
+          { value: "compete", label: "Compete", desc: "Results-driven, competitive, achievement-focused, fast-paced" },
+          { value: "control", label: "Control", desc: "Structured, efficient, process-driven, reliable, consistent" },
         ],
       },
       {

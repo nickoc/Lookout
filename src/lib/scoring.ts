@@ -359,12 +359,56 @@ function scoreStyle(profile: FullProfile, franchise: Franchise): number {
     else employeeScore = 50;
   }
 
+  // Culture fit — Zorakle's 4-quadrant model (Collaborate/Create/Compete/Control)
+  let cultureScore = 50;
+  if (profile.cultureFit) {
+    const isEmerging = franchise.unitCount < 70;
+    const isLegacy = franchise.unitCount > 300;
+    const isMidSize = franchise.unitCount >= 70 && franchise.unitCount <= 300;
+    const hasInnovationTags = franchiseTags.some((t) => ["innovative", "emerging", "new-concept", "tech-enabled"].includes(t));
+    const hasStructuredTags = franchiseTags.some((t) => ["proven-system", "systematic", "established", "structured"].includes(t));
+    const hasCommunityTags = franchiseTags.some((t) => ["community", "family", "team-oriented", "collaborative"].includes(t));
+
+    switch (profile.cultureFit) {
+      case "collaborate":
+        // Family-like cultures — senior care, education, community-focused, smaller systems
+        if (hasCommunityTags) cultureScore = 90;
+        else if (franchise.category === "Senior Care" || franchise.category === "Education") cultureScore = 85;
+        else if (isEmerging) cultureScore = 70; // smaller = more family-like
+        else if (isLegacy) cultureScore = 35; // big corps feel less family
+        else cultureScore = 55;
+        break;
+      case "create":
+        // Innovative, entrepreneurial — emerging brands, new concepts
+        if (hasInnovationTags || isEmerging) cultureScore = 90;
+        else if (isMidSize) cultureScore = 55;
+        else if (isLegacy) cultureScore = 25; // empire brands are opposite of "create"
+        else cultureScore = 50;
+        break;
+      case "compete":
+        // Results-driven — proven brands with strong financials, high revenue
+        if ((franchise.avgRevenue || 0) > 800_000) cultureScore = 85;
+        else if (isLegacy || hasStructuredTags) cultureScore = 75;
+        else if (isEmerging) cultureScore = 40; // emerging = less competitive track record
+        else cultureScore = 55;
+        break;
+      case "control":
+        // Structured, process-driven — proven systems, plug-and-play
+        if (hasStructuredTags || isMidSize) cultureScore = 85;
+        else if (isLegacy) cultureScore = 80;
+        else if (isEmerging) cultureScore = 30; // emerging = less structure
+        else cultureScore = 55;
+        break;
+    }
+  }
+
   return Math.round(
-    styleMatch * 0.35 +
-    dayToDayScore * 0.2 +
-    locationScore * 0.2 +
+    styleMatch * 0.30 +
+    dayToDayScore * 0.15 +
+    locationScore * 0.15 +
     hoursScore * 0.15 +
-    employeeScore * 0.1
+    employeeScore * 0.10 +
+    cultureScore * 0.15
   );
 }
 
@@ -518,11 +562,48 @@ function scoreExperience(profile: FullProfile, franchise: Franchise): number {
     eduFit = isProfessional ? 0.3 + edu * 0.7 : 0.4 + edu * 0.3; // less weight for non-professional
   }
 
+  // Sales orientation — Zorakle's 3-type model (Consultative/Relational/Competitive)
+  let salesFit = 0.5;
+  if (profile.salesOrientation) {
+    const isB2B = franchise.category === "B2B Services" || franchise.category === "Real Estate";
+    const isConsumer = franchise.category === "Food & Beverage" || franchise.category === "Retail" || franchise.category === "Personal Care";
+    const isCommunity = franchise.category === "Senior Care" || franchise.category === "Education" || franchise.category === "Pet Services";
+    const isService = franchise.category === "Home Services" || franchise.category === "Cleaning & Maintenance" || franchise.category === "Automotive";
+
+    switch (profile.salesOrientation) {
+      case "consultative":
+        // Solution-based selling — great for B2B, services, high-investment
+        if (isB2B) salesFit = 0.95;
+        else if (isService) salesFit = 0.8;
+        else if (isCommunity) salesFit = 0.7;
+        else if (isConsumer) salesFit = 0.45; // consumer = less consultative
+        else salesFit = 0.6;
+        break;
+      case "relational":
+        // Networking, referrals — great for community, senior care, education
+        if (isCommunity) salesFit = 0.95;
+        else if (isService) salesFit = 0.75;
+        else if (isB2B) salesFit = 0.7;
+        else if (isConsumer) salesFit = 0.5;
+        else salesFit = 0.6;
+        break;
+      case "competitive":
+        // High-volume, target-focused — great for consumer, retail, food
+        if (isConsumer) salesFit = 0.9;
+        else if (isB2B) salesFit = 0.65;
+        else if (isService) salesFit = 0.6;
+        else if (isCommunity) salesFit = 0.4; // community brands need softer approach
+        else salesFit = 0.55;
+        break;
+    }
+  }
+
   const raw =
-    mgmtFit * 0.30 +
-    ownershipFit * 0.25 +
-    skillFit * 0.30 +
-    eduFit * 0.15;
+    mgmtFit * 0.25 +
+    ownershipFit * 0.20 +
+    skillFit * 0.25 +
+    eduFit * 0.15 +
+    salesFit * 0.15;
 
   return Math.round(clamp(raw * 100, 0, 100));
 }
@@ -532,7 +613,7 @@ function scoreExperience(profile: FullProfile, franchise: Franchise): number {
 function scoreGrowth(profile: FullProfile, franchise: Franchise): number {
   // If no growth-related fields are filled, return neutral
   const hasGrowthData =
-    profile.unitPreference || profile.leadershipStyle ||
+    profile.unitPreference || profile.growthStage || profile.leadershipStyle ||
     profile.commitmentLevel || profile.consideringDuration ||
     (profile.hoursYear1 && profile.hoursYear2);
   if (!hasGrowthData) return 50;
@@ -601,11 +682,50 @@ function scoreGrowth(profile: FullProfile, franchise: Franchise): number {
     durationFit = durMap[profile.consideringDuration] ?? 0.5;
   }
 
+  // Growth stage preference — Zorakle's 5-stage model mapped to unit count
+  let stageFit = 0.5;
+  if (profile.growthStage) {
+    const units = franchise.unitCount;
+    switch (profile.growthStage) {
+      case "entrepreneur":
+        // Wants 0-20 unit emerging brands
+        if (units <= 20) stageFit = 0.95;
+        else if (units <= 50) stageFit = 0.65;
+        else if (units <= 70) stageFit = 0.4;
+        else stageFit = 0.15; // empire brands are wrong fit
+        break;
+      case "partner":
+        // Wants 20-70 unit growing systems
+        if (units >= 20 && units <= 70) stageFit = 0.95;
+        else if (units > 70 && units <= 150) stageFit = 0.65;
+        else if (units < 20 && units >= 10) stageFit = 0.6;
+        else if (units < 10) stageFit = 0.35;
+        else stageFit = 0.3;
+        break;
+      case "plug-and-play":
+        // Wants 70-300 unit proven systems
+        if (units >= 70 && units <= 300) stageFit = 0.95;
+        else if (units > 300 && units <= 500) stageFit = 0.7;
+        else if (units >= 40 && units < 70) stageFit = 0.6;
+        else if (units < 40) stageFit = 0.25;
+        else stageFit = 0.5;
+        break;
+      case "empire":
+        // Wants 300+ unit legacy brands
+        if (units > 300) stageFit = 0.95;
+        else if (units >= 150) stageFit = 0.65;
+        else if (units >= 70) stageFit = 0.4;
+        else stageFit = 0.15;
+        break;
+    }
+  }
+
   const raw =
-    unitFit * 0.30 +
-    trendFit * 0.15 +
-    leadershipFit * 0.15 +
-    commitFit * 0.25 +
+    unitFit * 0.20 +
+    stageFit * 0.25 +
+    trendFit * 0.10 +
+    leadershipFit * 0.10 +
+    commitFit * 0.20 +
     durationFit * 0.15;
 
   return Math.round(clamp(raw * 100, 0, 100));

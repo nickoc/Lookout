@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0b1120;
+  --bg2: #111827;
+  --card: #1a2332;
+  --card-hover: #1f2b3d;
+  --border: rgba(148,163,184,0.1);
+  --border-hover: rgba(148,163,184,0.2);
+  --teal: #14b8a6;
+  --blue: #3b82f6;
+  --purple: #a855f7;
+  --amber: #f59e0b;
+  --green: #22c55e;
+  --red: #ef4444;
+}
+
+body {
+  background: var(--bg);
+  color: #f1f5f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Score ring */
+.score-ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Animated logo */
+.logo-ring-outer {
+  animation: ring-expand 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.1s 1 both;
+  transform-origin: center;
+}
+.logo-ring-inner {
+  animation: ring-expand 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s 1 both;
+  transform-origin: center;
+}
+.logo-pupil {
+  animation: pupil-appear 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s 1 both;
+  transform-origin: center;
+}
+.logo-beam {
+  animation: beam-sweep 2s ease-out 0.3s 1 both;
+  transform-origin: 18px 18px;
+}
+.logo-lens {
+  animation: lens-flare 3s ease-in-out 0.5s 1;
+  transform-origin: center;
+}
+.logo-shimmer {
+  animation: shimmer-pass 2s ease-in-out 1s 1 both;
+}
+
+@keyframes ring-expand {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes pupil-appear {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes beam-sweep {
+  0% { opacity: 0; transform: rotate(-60deg); }
+  30% { opacity: 0.8; }
+  100% { opacity: 0; transform: rotate(30deg); }
+}
+@keyframes lens-flare {
+  0%, 100% { opacity: 0; }
+  40% { opacity: 0.6; }
+  60% { opacity: 0.8; }
+  80% { opacity: 0; }
+}
+@keyframes shimmer-pass {
+  0% { transform: translateX(-20px); opacity: 0; }
+  30% { opacity: 0.7; }
+  100% { transform: translateX(20px); opacity: 0; }
+}

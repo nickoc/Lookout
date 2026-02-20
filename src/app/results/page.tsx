@@ -2,25 +2,70 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { franchises } from "@/lib/franchises";
-import { scoreAllFranchises, type UserProfile } from "@/lib/scoring";
+import { scoreAllFranchises } from "@/lib/scoring";
+import { defaultProfile, type FullProfile } from "@/lib/quiz-data";
 import FranchiseCard from "@/components/FranchiseCard";
 import Link from "next/link";
 
+const dimensionLabels: Record<string, { label: string; icon: string }> = {
+  financial: { label: "Financial", icon: "💰" },
+  category: { label: "Category", icon: "🎯" },
+  style: { label: "Style", icon: "🏢" },
+  risk: { label: "Risk", icon: "⚖️" },
+  experience: { label: "Experience", icon: "📋" },
+  growth: { label: "Growth", icon: "📈" },
+};
+
 function ResultsContent() {
   const params = useSearchParams();
+  const [profile, setProfile] = useState<FullProfile>({ ...defaultProfile });
+  const [loaded, setLoaded] = useState(false);
 
-  const profile: UserProfile = {
-    budget: params.get("budget") || "100-200",
-    interests: (params.get("interests") || "").split(",").filter(Boolean),
-    style: params.get("style") || "owner-operator",
-    riskTolerance: params.get("risk") || "moderate",
-    timeline: "6",
-  };
+  useEffect(() => {
+    // Try localStorage first (full profile), fall back to URL params
+    const stored = localStorage.getItem("lookout-profile");
+    if (stored) {
+      try {
+        setProfile(JSON.parse(stored));
+      } catch {
+        // Fall back to URL params
+        setProfile({
+          ...defaultProfile,
+          budget: params.get("budget") || "100-200",
+          interests: (params.get("interests") || "").split(",").filter(Boolean),
+          style: params.get("style") || "owner-operator",
+          riskTolerance: params.get("risk") || "moderate",
+        });
+      }
+    } else {
+      setProfile({
+        ...defaultProfile,
+        budget: params.get("budget") || "100-200",
+        interests: (params.get("interests") || "").split(",").filter(Boolean),
+        style: params.get("style") || "owner-operator",
+        riskTolerance: params.get("risk") || "moderate",
+      });
+    }
+    setLoaded(true);
+  }, [params]);
 
-  const scored = useMemo(() => scoreAllFranchises(profile, franchises), [profile]);
+  const scored = useMemo(() => {
+    if (!loaded) return [];
+    return scoreAllFranchises(profile, franchises);
+  }, [profile, loaded]);
+
   const top = scored.slice(0, 15);
+
+  if (!loaded) {
+    return <div className="text-center pt-20 text-slate-500">Calculating your matches...</div>;
+  }
+
+  // Build a summary line from the profile
+  const budgetLabel = profile.budget ? `$${profile.budget.replace("-", "K–$")}K` : "";
+  const styleLabel = profile.style ? profile.style.replace(/-/g, " ") : "";
+  const riskLabel = profile.riskTolerance || "moderate";
 
   return (
     <div className="max-w-3xl mx-auto px-6 pt-12 pb-20">
@@ -30,8 +75,10 @@ function ResultsContent() {
         </div>
         <h1 className="text-3xl font-extrabold mb-2">Your Top Franchise Matches</h1>
         <p className="text-slate-400">
-          Based on your {profile.budget.replace("-", "K–$")}K budget,{" "}
-          {profile.style.replace("-", " ")} style, and {profile.riskTolerance} risk tolerance.
+          {budgetLabel && `Based on your ${budgetLabel} budget`}
+          {styleLabel && `, ${styleLabel} style`}
+          {riskLabel && `, and ${riskLabel} risk tolerance`}.
+          {profile.interests.length > 0 && ` Interested in ${profile.interests.slice(0, 3).join(", ")}${profile.interests.length > 3 ? ` +${profile.interests.length - 3} more` : ""}.`}
         </p>
       </div>
 
@@ -65,21 +112,20 @@ function ResultsContent() {
                     <span>{f.unitCount.toLocaleString()} units</span>
                   </div>
                 </div>
-                {/* Score breakdown mini */}
-                <div className="hidden sm:grid grid-cols-4 gap-2 text-center">
-                  {[
-                    { label: "Financial", val: f.scoreBreakdown.financial },
-                    { label: "Category", val: f.scoreBreakdown.category },
-                    { label: "Style", val: f.scoreBreakdown.style },
-                    { label: "Risk", val: f.scoreBreakdown.risk },
-                  ].map(b => (
-                    <div key={b.label}>
-                      <div className="text-xs font-bold" style={{ color: b.val >= 80 ? "#14b8a6" : b.val >= 60 ? "#3b82f6" : "#64748b" }}>
-                        {b.val}
+                {/* Score breakdown */}
+                <div className="hidden sm:grid grid-cols-6 gap-1.5 text-center">
+                  {Object.entries(f.scoreBreakdown).map(([key, val]) => {
+                    const dim = dimensionLabels[key];
+                    if (!dim) return null;
+                    return (
+                      <div key={key}>
+                        <div className="text-xs font-bold" style={{ color: val >= 80 ? "#14b8a6" : val >= 60 ? "#3b82f6" : "#64748b" }}>
+                          {val}
+                        </div>
+                        <div className="text-[0.5rem] text-slate-600 uppercase">{dim.label}</div>
                       </div>
-                      <div className="text-[0.55rem] text-slate-600 uppercase">{b.label}</div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
